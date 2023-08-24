@@ -1,14 +1,108 @@
+# run_simulation.py
+
+## 概要
+DAGファイルの生成、シミュレータの実行・評価までをまとめて行う
+
+## 実行方法
+
+### 準備
+DAGファイル生成に用いるconfigファイルを以下の通りに配置する
+
+```
+simulator
+ L sourcecode
+   - all_execute.py
+   - devide_files.py
+   - result_check.py
+   - run_simulation.py
+ L config
+   - basic_chain_based-10.yaml
+   - basic_chain_based-09.yaml
+   - basic_chain_based-08.yaml
+   - basic_chain_based-07.yaml
+   - basic_chain_based-06.yaml
+```
+
+### 実行
+DAGファイル生成場所のパス(-d)、シミュレータ実行場所のパス(-s)、シミュレータ実行時のコア数(-c)を指定する
+
+```
+python3 simulation.py -d {DAGファイル生成場所のパス} -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
+```
+
+### 出力
+configファイルごと及び全体に対し、以下の内容を表示
+- Max utilization: configファイルで設定した利用率
+- Number of .yaml files: 対象yamlファイルの数
+- Number of schedulable: Schedulableの数
+- Number of unschedulable: Unschedulableの数
+- Acceptance of schedulable: Schedulableの割合
+
+グラフを作成し、表示/保存する
+- 縦軸：受理率 [resultがtrueの数/全体の数]
+- 横軸：利用率 [0.6 ~ 1.0]
+- 保存場所は `sourcecode/{アルゴリズム名}/OutputsResult`
+- ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
+
+```
+simulator
+ L sourcecode
+   L {アルゴリズム名}
+     L UsedDag (フォルダ分割後のDAGファイル)
+       L Max_utilization-1.0
+         - config.yaml
+         L DAGs_0
+           - dag_OOOO.yaml
+         L DAGs_1
+       L Max_utilization-0.9
+       L Max_utilization-0.8
+       L Max_utilization-0.7
+       L Max_utilization-0.6
+     L SchedResult (シミュレータ実行結果)
+       L {使ったコア数}-cores
+          L Max_utilization-1.0
+            -2023-07... (スケジュール結果.yaml)
+            -2023-07... 
+          L Max_utilization-0.9
+          L Max_utilization-0.8
+          L Max_utilization-0.7
+          L Max_utilization-0.6
+     L OutputsResult (評価結果)
+       - plot_accept_{アルゴリズム名}_{コア数}-cores.png
+ L config (configファイル)
+   - basic_chain_based-10.yaml
+   - basic_chain_based-09.yaml
+   - basic_chain_based-08.yaml
+   - basic_chain_based-07.yaml
+   - basic_chain_based-06.yaml
+ L DAGs (生成したDAGファイル)
+   L Max_utilization-1.0
+     L DAGs
+      - DAGs_OOOO.yaml
+   L Max_utilization-0.9
+   L Max_utilization-0.8
+   L Max_utilization-0.7
+   L Max_utilization-0.6
+```
+
+## 備考
+一度実行した後でもコア数を変えて同様に実行することで、異なるコア数の評価も取ることができる
+ - その際、DAGファイルの準備をスキップする
+
+
+- - -
+
 # all_execute.py
-aaa
+
 ## 概要
 異なるMax utilizationごとのフォルダにある、dagファイルのフォルダに対し、シミュレータをまとめて実行する
 
 ## 実行方法
 
 ### 準備
-以下の各コマンドをすべてのコンフィグファイルに対して実行する
+以下の各コマンドをすべてのconfigファイルに対して実行する
 
-- dagファイルを生成(zipファイルでは作成済み)
+- dagファイルを生成
 
   `python3 run_generator.py -c ./config/basic_chain_based-OX.yaml -d simulator/DAGs/Max_utilization-O.X`
 
@@ -16,7 +110,7 @@ aaa
 
   `cd simulator/sourcecode`
 
-- devide_files.pyを用い、以下のようにdagファイルを配置する(zipファイルではアルゴリズム名のフォルダまで作成済み)
+- devide_files.pyを用い、以下のようにdagファイルを配置する
 
   `python3 devide_files.py -s ../DAGs/Max_utilization-O.X/DAGs/ -n 1000 -o {アルゴリズム名}/UsedDag/Max_utilization-O.X`
 
@@ -83,8 +177,6 @@ simulator
 
 
 ## 備考
-`devide_files.py`の入力をオプションに変更しました。
-- 詳細は一番下
 
 
 - - -

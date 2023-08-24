@@ -4,13 +4,48 @@ import yaml
 import re
 import matplotlib.pyplot as plt
 
+
+# カスタムタグの定義
+# !Schedulableタグの定義
+class SchedulableTag:
+    def __init__(self, high_dedicated_cores, low_dedicated_cores):
+        self.high_dedicated_cores = high_dedicated_cores
+        self.low_dedicated_cores = low_dedicated_cores
+
+
+# !Unschedulableタグの定義
+class UnschedulableTag:
+    def __init__(self, reason, insufficient_cores):
+        self.reason = reason
+        self.insufficient_cores = insufficient_cores
+
+
+# カスタムタグのコンストラクタ
+def custom_constructor_schedulable(loader, node):
+    data = loader.construct_mapping(node, deep=True)
+    return SchedulableTag(**data)
+
+
+def custom_constructor_unschedulable(loader, node):
+    data = loader.construct_mapping(node, deep=True)
+    return UnschedulableTag(**data)
+
+
+# カスタムタグを登録
+yaml.SafeLoader.add_constructor('!Schedulable',
+                                custom_constructor_schedulable)
+yaml.SafeLoader.add_constructor('!Unschedulable',
+                                custom_constructor_unschedulable)
+
+
+# 文字列から数値を抽出
 def extract_numbers_from_string(input_string):
     # 正規表現パターン: 数字の連続した部分を抽出
     pattern = r"\d+(\.\d+)?"
-    
+
     # 正規表現にマッチする部分を取得
     match = re.search(pattern, input_string)
-    
+
     # マッチした部分を数値に変換して返す
     if match:
         number = float(match.group())
@@ -18,13 +53,13 @@ def extract_numbers_from_string(input_string):
     else:
         return None
 
-# ファイルから"result:"の行を読み込む
-def read_result_line(file_path):
+
+# yamlファイルを読み込み
+def read_yaml_file(file_path):
     with open(file_path, 'r') as file:
-        for line in file:
-            if "result:" in line:
-                return line.strip()
-    return None
+        data = yaml.safe_load(file)
+        return data
+
 
 # ディレクトリ内のファイルのうち、"result: !Schedulable"と"result: !Unschedulable"の数をカウント
 def count_results(directory_path):
@@ -63,13 +98,16 @@ def count_results(directory_path):
                 yaml_count[i] += 1
                 file_path = os.path.join(subdir, file_name)
 
-                # ファイルから"result:"の行を読み込み、結果に応じてカウント
-                result_line = read_result_line(file_path)
-                if result_line == "result: !Schedulable":
+                # ファイルからresultを確認
+                data = read_yaml_file(file_path)
+                # resultが!Schedulableの場合
+                if isinstance(data['result'], SchedulableTag):
                     schedulable_count[i] += 1
-                elif result_line == "result: !Unschedulable":
+                # resultが!Unschedulableの場合
+                elif isinstance(data['result'], UnschedulableTag):
                     unschedulable_count[i] += 1
-
+                else:
+                    print("Unknown Result")
 
     # カウント結果を表示
     accept = [0.0] * subdir_count
@@ -88,9 +126,9 @@ def count_results(directory_path):
     print("  Number of .yaml files: {}".format(sum(yaml_count)))
     print("  Number of schedulable: {}".format(sum(schedulable_count)))
     print("  Number of unschedulable: {}".format(sum(unschedulable_count)))
-    print("  Acceptance of schedulable: {}".format(sum(schedulable_count) / sum(yaml_count)))
+    print("  Acceptance of schedulable: {}".format(sum(schedulable_count)
+                                                   / sum(yaml_count)))
     print("")
-
 
     # グラフを作成
     # ディレクトリ名からコア数を取得
@@ -98,12 +136,12 @@ def count_results(directory_path):
 
     # アルゴリズムのディレクトリパスを取得
     algorithm_dir = os.path.dirname(os.path.dirname(directory_path))
-    
+
     # アルゴリズムのディレクトリ名を取得
     algorithm_name = os.path.basename(algorithm_dir)
 
-    #print(max_utilization)
-    #print(accept)
+    # print(max_utilization)
+    # print(accept)
 
     # 縦軸: Acceptance of schedulable
     # 横軸: Max utilization
