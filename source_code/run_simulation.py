@@ -1,12 +1,16 @@
 import argparse
 import sys
 import os
-import re
+
+from lib import util
+from lib import divide_files
+from lib import all_execute
+from lib import result_check
 
 
 def option_parser(args):
     parser = argparse.ArgumentParser()
-    # DAGファイルの生成場所のパス
+    # DAGファイル生成アルゴリズム RD-Genの実行フォルダパス
     parser.add_argument(
         "-d", "--create_dags", required=True, type=str, help="path to create DAGs."
     )
@@ -17,22 +21,6 @@ def option_parser(args):
     args = parser.parse_args()
 
     return vars(args)
-
-
-# 文字列から数値を抽出
-def extract_numbers_from_string(input_string):
-    # 正規表現パターン: 数字の連続した部分を抽出
-    pattern = r"\d+(\.\d+)?"
-
-    # 正規表現にマッチする部分を取得
-    match = re.search(pattern, input_string)
-
-    # マッチした部分を数値に変換して返す
-    if match:
-        number = float(match.group())
-        return number
-    else:
-        return None
 
 
 if __name__ == "__main__":
@@ -51,14 +39,14 @@ if __name__ == "__main__":
     if not os.path.exists(f"{algorithm}/"):
         # DAGファイルを生成
         print("----------Create DAGs----------")
-        # configファイルを取得
+        # config下の各ファイル名から数値を抽出
         config_dir_path = os.path.abspath("../config")
         config_files = os.listdir("../config")
         config_paths = [os.path.join(config_dir_path, file_name) for file_name in config_files]
         # ディレクトリ名から数値を抽出
         max_utilization = [0] * len(config_files)
         for i, file in enumerate(config_files):
-            number = extract_numbers_from_string(file)
+            number = util.extract_numbers_from_string(file)
             if number is None:
                 continue
             max_utilization[i] = number / 10
@@ -89,16 +77,12 @@ if __name__ == "__main__":
         if not os.path.exists(f"{algorithm}/"):
             os.mkdir(f"{algorithm}/")
         DAGs_dirs = os.listdir("../DAGs/")
-        command_divide_files = (
-            "python3 divide_files.py -s ../DAGs/{DAGs_dir}/DAGs/ -n {folder_num} "
-            "-o {algorithm}/UsedDag/{DAGs_dir}/"
-        )
         for DAGs_dir in DAGs_dirs:
-            full_command = command_divide_files.format(
-                DAGs_dir=DAGs_dir, folder_num=FOLDER_NUM, algorithm=algorithm
+            divide_files.divide_files_to_folders(
+                source_folder=f"../DAGs/{DAGs_dir}/DAGs/",
+                num_folders=FOLDER_NUM,
+                output_folder_path=f"{algorithm}/UsedDag/{DAGs_dir}/",
             )
-            print(full_command)
-            os.system(full_command)
         # configファイルをコピー
         command = "cp {config} {algorithm}/UsedDag/MAX_utilization-{utilization}/"
         for config in config_paths:
@@ -113,16 +97,13 @@ if __name__ == "__main__":
     print("----------All execute----------")
     execute_simulator_path = os.path.abspath(args["simulator"])
     core_num = args["core_num"]
-    command_all_execute = (
-        f"python3 all_execute.py -e {execute_simulator_path} -d {algorithm}/UsedDag/ -c {core_num}"
+    all_execute.execute_command_in_subdirectories(
+        execute_dir=execute_simulator_path, root_dir=f"{algorithm}/UsedDag/", core_num=core_num
     )
-    print(command_all_execute)
-    os.system(command_all_execute)
+    os.chdir(simulator_dir_path + "/source_code")
     print("----------Finish----------")
 
     # result_check.pyを実行
     print("----------Result check----------")
-    command_result_check = f"python3 result_check.py {algorithm}/SchedResult/{core_num}-cores/"
-    print(command_result_check)
-    os.system(command_result_check)
+    result_check.count_results(f"{algorithm}/SchedResult/{core_num}-cores/")
     print("----------Finish----------")

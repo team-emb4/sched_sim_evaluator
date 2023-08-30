@@ -11,10 +11,11 @@ DAGファイル生成に用いるconfigファイルを以下の通りに配置�
 ```
 simulator
  L source_code
-   - all_execute.py
-   - divide_files.py
-   - result_check.py
    - run_simulation.py
+   L lib
+     - all_execute.py
+     - divide_files.py
+     - result_check.py
  L config
    - basic_chain_based-10.yaml
    - basic_chain_based-09.yaml
@@ -24,10 +25,10 @@ simulator
 ```
 
 ### 実行
-DAGファイル生成場所のパス(-d)、シミュレータ実行場所のパス(-s)、シミュレータ実行時のコア数(-c)を指定する
+DAGファイル生成アルゴリズムの実行フォルダパス(-d)、シミュレータ実行場所のパス(-s)、シミュレータ実行時のコア数(-c)を指定する
 
 ```
-python3 simulation.py -d {DAGファイル生成場所のパス} -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
+python3 run_simulation.py -d {DAGファイル生成アルゴリズムの実行フォルダパス} -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
 ```
 
 ### 出力
@@ -47,6 +48,7 @@ configファイルごと及び全体に対し、以下の内容を表示
 ```
 simulator
  L source_code
+   L lib
    L {アルゴリズム名}
      L UsedDag (フォルダ分割後のDAGファイル)
        L Max_utilization-1.0
@@ -138,9 +140,9 @@ simulator
 ```
 
 ### 実行
-シミュレータ実行場所のパス(-e)・実行対象ディレクトリのパス(-d)・コア数(-c)を指定する
+シミュレータ実行場所のパス(-e)・実行対象DAGディレクトリ群のパス(-d)・コア数(-c)を指定する
 
-- 実行対象ディレクトリのパスは、異なるMax utilizationごとのフォルダを含むフォルダ
+- 実行対象DAGディレクトリ群のパスは、異なるMax utilizationごとのフォルダを含むフォルダ
   - 上記の例ならUsedDag
 
 ```
