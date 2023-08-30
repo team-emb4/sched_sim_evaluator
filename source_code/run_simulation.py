@@ -12,7 +12,7 @@ def option_parser(args):
     parser = argparse.ArgumentParser()
     # DAGファイル生成アルゴリズム RD-Genの実行フォルダパス
     parser.add_argument(
-        "-d", "--create_dags", required=True, type=str, help="path to create DAGs."
+        "-d", "--dag_creator", required=True, type=str, help="path to dag creator."
     )
     # シミュレータ実行場所のパス
     parser.add_argument("-s", "--simulator", required=True, type=str, help="path to simulator.")
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     args = option_parser(sys.argv[1:])
 
     # simulatorディレクトリのパスを取得
-    simulator_dir_path = os.path.abspath("../")
+    evaluator_dir_path = os.path.abspath("../")
 
     # アルゴリズム名を取得
     algorithm = os.path.basename(os.path.dirname(args["simulator"]))
@@ -53,8 +53,8 @@ if __name__ == "__main__":
 
         if not os.path.exists("../DAGs"):
             os.mkdir("../DAGs")
-        DAG_dir_path = os.path.abspath(args["create_dags"])
-        os.chdir(DAG_dir_path)
+        DAG_creator_path = os.path.abspath(args["create_dags"])
+        os.chdir(DAG_creator_path)
         command_create_dags = (
             "python3 run_generator.py -c {config} "
             "-d {simulator_dir_path}/DAGs/Max_utilization-{utilization}"
@@ -62,14 +62,14 @@ if __name__ == "__main__":
         for i, config in enumerate(config_paths):
             full_command = command_create_dags.format(
                 config=config,
-                simulator_dir_path=simulator_dir_path,
+                simulator_dir_path=evaluator_dir_path,
                 utilization=max_utilization[i],
             )
             print(full_command)
             os.system(full_command)
         print("----------Finish----------")
 
-        os.chdir(simulator_dir_path + "/source_code")
+        os.chdir(evaluator_dir_path + "/source_code")
 
         # divide_files.pyを実行
         print("----------Divide files----------")
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     all_execute.execute_command_in_subdirectories(
         execute_dir=execute_simulator_path, root_dir=f"{algorithm}/UsedDag/", core_num=core_num
     )
-    os.chdir(simulator_dir_path + "/source_code")
+    os.chdir(evaluator_dir_path + "/source_code")
     print("----------Finish----------")
 
     # result_check.pyを実行

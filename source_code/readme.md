@@ -9,7 +9,7 @@ DAGファイルの生成、シミュレータの実行・評価までをまと�
 DAGファイル生成に用いるconfigファイルを以下の通りに配置する
 
 ```
-simulator
+evaluator
  L source_code
    - run_simulation.py
    L libs
@@ -46,7 +46,7 @@ configファイルごと及び全体に対し、以下の内容を表示
 - ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
 
 ```
-simulator
+evaluator
  L source_code
    L libs
    L {アルゴリズム名}
@@ -106,11 +106,11 @@ simulator
 
 - dagファイルを生成
 
-  `python3 run_generator.py -c ./config/basic_chain_based-OX.yaml -d simulator/DAGs/Max_utilization-O.X`
+  `python3 run_generator.py -c ./config/basic_chain_based-OX.yaml -d evaluator/DAGs/Max_utilization-O.X`
 
 - 作業場所に移動
 
-  `cd simulator/source_code`
+  `cd evaluator/source_code`
 
 - divide_files.pyを用い、以下のようにdagファイルを配置する
 
@@ -123,7 +123,7 @@ simulator
 最終的に以下のようにファイルが配置される
 
 ```
-simulator
+evaluator
  L source_code
    L {アルゴリズム名}
      L UsedDag
@@ -152,7 +152,7 @@ python3 all_execute.py -e {シミュレータ実行場所のパス} -d {アル�
 シミュレータの実行結果は、コア数ごとに`source_code/{アルゴリズム名}/SchedResult`のディレクトリに作成される
 
 ```
-simulator
+evaluator
  L source_code
    L {アルゴリズム名}
      L UsedDag
@@ -213,7 +213,7 @@ outputsにあるコア数ごとのフォルダのパスを指定する
 - ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
 
 ```
-simulator
+evaluator
  L source_code
    L {アルゴリズム名}
      L UsedDag

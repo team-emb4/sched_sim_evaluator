@@ -36,25 +36,25 @@ def divide_files_to_folders(source_folder, num_folders, output_folder_path=None)
     source_folder_name = os.path.basename(os.path.dirname(source_folder))
 
     # フォルダ数に分ける処理
-    start_index = 0
+    source_file_index = 0
     for i in range(num_folders):
         # 新フォルダ名を"{元フォルダ名}_0", "{元フォルダ名}_1"という形式で作成
-        folder_name = f"{source_folder_name}_{i}"
-        folder_path = os.path.join(output_folder_path, folder_name)
+        new_folder_name = f"{source_folder_name}_{i}"
+        new_folder_path = os.path.join(output_folder_path, new_folder_name)
 
         # フォルダを作成
-        os.makedirs(folder_path, exist_ok=True)
+        os.makedirs(new_folder_path, exist_ok=True)
 
         # ファイルをコピー
         num_files_in_folder = files_per_folder + (1 if i < remaining_files else 0)
         for j in range(num_files_in_folder):
-            file_name = files[start_index + j]
+            file_name = files[source_file_index + j]
             source_file = os.path.join(source_folder, file_name)
-            output_file = os.path.join(folder_path, file_name)
+            output_file = os.path.join(new_folder_path, file_name)
             shutil.copy(source_file, output_file)
 
-        # 次のフォルダの開始位置を更新
-        start_index += num_files_in_folder
+        # 次のフォルダにコピーするファイルの開始位置を更新
+        source_file_index += num_files_in_folder
 
 
 if __name__ == "__main__":
