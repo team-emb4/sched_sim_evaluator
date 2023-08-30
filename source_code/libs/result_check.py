@@ -45,54 +45,54 @@ def read_yaml_file(file_path):
 
 
 # ディレクトリ内のファイルのうち、"result: !Schedulable"と"result: !Unschedulable"の数をカウント
-def count_results(directory_path):
+def count_results(root_log_dir_path):
     # 入力ディレクトリの絶対パスを取得
-    if not os.path.isabs(directory_path):
-        directory_path = os.path.abspath(directory_path)
+    if not os.path.isabs(root_log_dir_path):
+        root_log_dir_path = os.path.abspath(root_log_dir_path)
 
     # 入力ディレクトリの中にあるディレクトリの数をカウント
-    subdir_count = len(os.listdir(directory_path))
+    log_dir_count = len(os.listdir(root_log_dir_path))
 
     # カウント結果を格納する配列を初期化
-    max_utilization = [0] * subdir_count
-    yaml_count = [0] * subdir_count
-    schedulable_count = [0] * subdir_count
-    unschedulable_count = [0] * subdir_count
+    max_utilization = [0] * log_dir_count
+    yaml_count = [0] * log_dir_count
+    schedulable_count = [0] * log_dir_count
+    unschedulable_count = [0] * log_dir_count
 
-    dir_list = os.listdir(directory_path)
+    dir_list = os.listdir(root_log_dir_path)
     dir_list.sort()
 
     # 入力ディレクトリの中にあるディレクトリごとに処理
-    for i, subdir in enumerate(dir_list):
+    for i, log_dir in enumerate(dir_list):
         # ディレクトリ名から数値を抽出
-        number = util.extract_numbers_from_string(subdir)
+        number = util.extract_numbers_from_string(log_dir)
         if number is None:
             continue
         max_utilization[i] = number
 
         # ディレクトリ内のファイルを取得
-        subdir = os.path.join(directory_path, subdir)
-        file_list = os.listdir(subdir)
+        log_dir = os.path.join(root_log_dir_path, log_dir)
+        log_file_list = os.listdir(log_dir)
 
-        for file_name in file_list:
+        for file_name in log_file_list:
             # ファイル名が".yaml"で終わる場合のみ処理
             if file_name.endswith(".yaml"):
                 yaml_count[i] += 1
-                file_path = os.path.join(subdir, file_name)
+                log_file_path = os.path.join(log_dir, file_name)
 
                 # ファイルからresultを確認
-                data = read_yaml_file(file_path)
+                log_data = read_yaml_file(log_file_path)
                 # resultが!Schedulableの場合
-                if isinstance(data["result"], SchedulableTag):
+                if isinstance(log_data["result"], SchedulableTag):
                     schedulable_count[i] += 1
                 # resultが!Unschedulableの場合
-                elif isinstance(data["result"], UnschedulableTag):
+                elif isinstance(log_data["result"], UnschedulableTag):
                     unschedulable_count[i] += 1
                 else:
                     print("Unknown Result")
 
     # カウント結果を表示
-    accept = [0.0] * subdir_count
+    accept = [0.0] * log_dir_count
     for i, subdir in enumerate(dir_list):
         print("Directory: {}".format(subdir))
         print("  Max utilization: {}".format(max_utilization[i]))
@@ -113,10 +113,10 @@ def count_results(directory_path):
 
     # グラフを作成
     # ディレクトリ名からコア数を取得
-    core = os.path.basename(directory_path)
+    core = os.path.basename(root_log_dir_path)
 
     # アルゴリズムのディレクトリパスを取得
-    algorithm_dir = os.path.dirname(os.path.dirname(directory_path))
+    algorithm_dir = os.path.dirname(os.path.dirname(root_log_dir_path))
 
     # アルゴリズムのディレクトリ名を取得
     algorithm_name = os.path.basename(algorithm_dir)

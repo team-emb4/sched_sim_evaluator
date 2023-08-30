@@ -4,7 +4,7 @@ import os
 
 from libs import util
 from libs import divide_files
-from libs import all_execute
+from libs import batch_simulation
 from libs import result_check
 
 
@@ -93,12 +93,14 @@ if __name__ == "__main__":
             os.system(full_command)
         print("----------Finish----------")
 
-    # all_execute.pyを実行
-    print("----------All execute----------")
+    # batch_simulation.pyを実行
+    print("----------Batch simulation----------")
     execute_simulator_path = os.path.abspath(args["simulator"])
     core_num = args["core_num"]
-    all_execute.execute_command_in_subdirectories(
-        execute_dir=execute_simulator_path, root_dir=f"{algorithm}/UsedDag/", core_num=core_num
+    batch_simulation.execute_command_in_subdirectories(
+        execute_dir=execute_simulator_path,
+        dagsets_root_dir=f"{algorithm}/UsedDag/",
+        core_num=core_num,
     )
     os.chdir(evaluator_dir_path + "/source_code")
     print("----------Finish----------")

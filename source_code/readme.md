@@ -13,7 +13,7 @@ evaluator
  L source_code
    - run_simulation.py
    L libs
-     - all_execute.py
+     - batch_simulation.py
      - divide_files.py
      - result_check.py
  L config
@@ -91,10 +91,11 @@ evaluator
 一度実行した後でもコア数を変えて同様に実行することで、異なるコア数の評価も取ることができる
  - その際、DAGファイルの準備をスキップする
 
-
 - - -
+- - -
+# **libs**
 
-# all_execute.py
+# batch_simulation.py
 
 ## 概要
 異なるMax utilizationごとのフォルダにある、dagファイルのフォルダに対し、シミュレータをまとめて実行する
@@ -146,7 +147,7 @@ evaluator
   - 上記の例ならUsedDag
 
 ```
-python3 all_execute.py -e {シミュレータ実行場所のパス} -d {アルゴリズム名}/UsedDag/ -c {コア数}
+python3 batch_simulation.py -e {シミュレータ実行場所のパス} -d {アルゴリズム名}/UsedDag/ -c {コア数}
 ```
 
 シミュレータの実行結果は、コア数ごとに`source_code/{アルゴリズム名}/SchedResult`のディレクトリに作成される
@@ -191,7 +192,7 @@ evaluator
 ## 実行方法
 
 ### 準備
-all_execute.pyを実行し、結果のファイルを作成(上記参照)
+batch_simulation.pyを実行し、結果のファイルを作成(上記参照)
 
 ### 実行
 outputsにあるコア数ごとのフォルダのパスを指定する
