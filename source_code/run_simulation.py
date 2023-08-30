@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
         if not os.path.exists("../DAGs"):
             os.mkdir("../DAGs")
-        DAG_creator_path = os.path.abspath(args["create_dags"])
+        DAG_creator_path = os.path.abspath(args["dag_creator"])
         os.chdir(DAG_creator_path)
         command_create_dags = (
             "python3 run_generator.py -c {config} "
