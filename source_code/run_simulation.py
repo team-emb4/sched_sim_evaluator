@@ -2,10 +2,10 @@ import argparse
 import sys
 import os
 
-from lib import util
-from lib import divide_files
-from lib import all_execute
-from lib import result_check
+from libs import util
+from libs import divide_files
+from libs import all_execute
+from libs import result_check
 
 
 def option_parser(args):

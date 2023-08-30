@@ -12,7 +12,7 @@ DAGファイル生成に用いるconfigファイルを以下の通りに配置�
 simulator
  L source_code
    - run_simulation.py
-   L lib
+   L libs
      - all_execute.py
      - divide_files.py
      - result_check.py
@@ -48,7 +48,7 @@ configファイルごと及び全体に対し、以下の内容を表示
 ```
 simulator
  L source_code
-   L lib
+   L libs
    L {アルゴリズム名}
      L UsedDag (フォルダ分割後のDAGファイル)
        L Max_utilization-1.0
