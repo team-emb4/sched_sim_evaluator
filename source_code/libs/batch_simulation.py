@@ -40,7 +40,6 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     for dagsets_dir in os.listdir(dagsets_root_dir):
         print("Target directory: " + dagsets_dir)
-        output_dir_name = dagsets_dir
         dagsets_dir_path = os.path.join(dagsets_root_dir, dagsets_dir)
         if os.path.isdir(dagsets_dir_path):
             # サブディレクトリ内の各ディレクトリのパスをコマンドライン引数として実行する
@@ -48,7 +47,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
                 dagset_dir_path = os.path.join(dagsets_dir_path, dagset_dir)
                 if os.path.isdir(dagset_dir_path):
                     # 利用率ごとの結果出力先のサブディレクトリを作成
-                    output_dir = os.path.join(output_root_dir, output_dir_name)
+                    output_dir = os.path.join(output_root_dir, dagsets_dir)
                     os.makedirs(output_dir, exist_ok=True)
 
                     full_command = command.format(
