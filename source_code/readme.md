@@ -27,18 +27,19 @@ evaluator
 
 ### 実行
 DAGファイル生成アルゴリズムの実行フォルダパス(-d)，シミュレータ実行場所のパス(-s)，シミュレータ実行時のコア数(-c)を指定する
+- すでにDAGファイルが生成済みの場合は，-dを指定しなくてもよい
 
 ```
-python3 run_simulation.py -d {DAGファイル生成アルゴリズムの実行フォルダパス} -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
+python3 run_simulation.py [-d {DAGファイル生成アルゴリズムの実行フォルダパス}] -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
 ```
 
 ### 出力
 configファイルごと及び全体に対し，以下の内容を表示
 - Max utilization: configファイルで設定した最大利用率
 - Number of .yaml files: 対象ログyamlファイルの数
-- Number of schedulable: Schedulableの数
-- Number of unschedulable: Unschedulableの数
-- Acceptance of schedulable: Schedulableの割合
+- Number of schedulable(true): Schedulable(true)の数
+- Number of unschedulable(false): Unschedulable(false)の数
+- Acceptance of schedulable(true): Schedulable(true)の割合
 
 グラフを作成し，表示/保存する
 - 縦軸：受理率 [resultがtrueの数/全体の数]
@@ -63,13 +64,13 @@ evaluator
        L Max_utilization-0.6
      L SchedResult (シミュレータ実行結果)
        L {使ったコア数}-cores
-          L Max_utilization-1.0
-            -2023-07... (スケジュール結果.yaml)
-            -2023-07... 
-          L Max_utilization-0.9
-          L Max_utilization-0.8
-          L Max_utilization-0.7
-          L Max_utilization-0.6
+         L Max_utilization-1.0
+           -2023-07... (スケジュール結果.yaml)
+           -2023-07... 
+         L Max_utilization-0.9
+         L Max_utilization-0.8
+         L Max_utilization-0.7
+         L Max_utilization-0.6
      L OutputsResult (評価結果)
        - plot_accept_{アルゴリズム名}_{コア数}-cores.png
  L config (configファイル)
@@ -87,10 +88,51 @@ evaluator
    L Max_utilization-0.7
    L Max_utilization-0.6
 ```
+いくつかのアルゴリズムは，構造が若干異なる
+- 2013_ECRTS_basic_global_edf
+  - `SchedResult`の中に`Preemptive`と`NonPreemptive`フォルダがある
+```
+evaluator
+ L source_code
+   L 2013_ECRTS_basic_global_edf
+     L UsedDag (フォルダ分割後のDAGファイル)
+     L SchedResult (シミュレータ実行結果)
+       L Preemptive
+         L {使ったコア数}-cores
+           L Max_utilization-1.0
+             -2023-07... (スケジュール結果.yaml)
+             -2023-07... 
+           L Max_utilization-0.9
+           L Max_utilization-0.8
+           L Max_utilization-0.7
+           L Max_utilization-0.6
+       L NonPreemptive
+         L {使ったコア数}-cores
+     L OutputsResult (評価結果)
+       - plot_accept_{アルゴリズム名}_Preemptive_{コア数}-cores.png
+       - plot_accept_{アルゴリズム名}_NonPreemptive_{コア数}-cores.png       
+```
+- 2020_RTSS_cpc_model_based_algorithm
+  - `UsedDag`の各利用率のフォルダの中に，DAGファイルがそのまま置いてある
+```
+evaluator
+ L source_code
+   L 2020_RTSS_cpc_model_based_algorithm
+     L UsedDag (フォルダ分割後のDAGファイル)
+       L Max_utilization-1.0
+         - config.yaml
+         - dag_OOOO.yaml
+       L Max_utilization-0.9
+       L Max_utilization-0.8
+       L Max_utilization-0.7
+       L Max_utilization-0.6     
+     L SchedResult (シミュレータ実行結果)
+     L OutputsResult (評価結果)
+```
+
 
 ## 備考
-一度実行した後でもコア数を変えて同様に実行することで，異なるコア数の評価も取ることができる
- - その際，DAGファイルの生成をスキップする
+すでにDAGファイルやUseDagファイルが生成済みの場合は，生成をスキップする
 
 - - -
 - - -
@@ -117,6 +159,7 @@ evaluator
   `cd evaluator/source_code`
 
 - divide_files.pyを用い，以下のようにdagファイルを配置する
+  - 2020_RTSS_cpc_model_based_algorithmのときはdivide_files.pyを用いず，DAGファイルをそのまま配置する
 
   `python3 divide_files.py -s ../DAGs/Max_utilization-O.X/DAGs/ -n 1000 -o {アルゴリズム名}/UsedDag/Max_utilization-O.X`
 
@@ -142,6 +185,21 @@ evaluator
        L Max_utilization-0.7
        L Max_utilization-0.6
 ```
+- 2020_RTSS_cpc_model_based_algorithmのとき
+```
+evaluator
+ L source_code
+   L 2020_RTSS_cpc_model_based_algorithm
+     L UsedDag
+       L Max_utilization-1.0
+         - config.yaml
+         - dag_1.yaml
+         - dag_2.yaml
+       L Max_utilization-0.9
+       L Max_utilization-0.8
+       L Max_utilization-0.7
+       L Max_utilization-0.6
+```
 
 ### 実行
 シミュレータ実行場所のパス(-e)・実行対象DAGディレクトリ群のパス(-d)・コア数(-c)を指定する
@@ -155,6 +213,7 @@ python3 batch_simulation.py -e {シミュレータ実行場所のパス} -d {ア
 
 ### 出力
 シミュレータの実行結果は，コア数ごとに`source_code/{アルゴリズム名}/SchedResult`のディレクトリに作成される
+- 2013_ECRTS_basic_global_edfのとき，`SchedResult`の中に`Preemptive`と`NonPreemptive`のフォルダがそれぞれ作成される
 
 ```
 evaluator
@@ -162,11 +221,6 @@ evaluator
    L {アルゴリズム名}
      L UsedDag
        L Max_utilization-1.0
-         - config.yaml
-         L DAGs_0
-           - dag_1.yaml
-           - dag_2.yaml
-         L DAGs_1
        L Max_utilization-0.9
        L Max_utilization-0.8
        L Max_utilization-0.7
@@ -181,7 +235,30 @@ evaluator
           L Max_utilization-0.7
           L Max_utilization-0.6
 ```
-
+- 2013_ECRTS_basic_global_edfのとき
+```
+evaluator
+ L source_code
+   L 2013_ECRTS_basic_global_edf
+     L UsedDag
+       L Max_utilization-1.0
+       L Max_utilization-0.9
+       L Max_utilization-0.8
+       L Max_utilization-0.7
+       L Max_utilization-0.6
+     L SchedResult (シミュレータ実行結果)
+       L Preemptive
+         L {使ったコア数}-cores
+           L Max_utilization-1.0
+             -2023-07... (スケジュール結果.yaml)
+             -2023-07... 
+           L Max_utilization-0.9
+           L Max_utilization-0.8
+           L Max_utilization-0.7
+           L Max_utilization-0.6
+       L NonPreemptive
+         L {使ったコア数}-cores
+```
 
 ## 備考
 
@@ -207,15 +284,16 @@ SchedResultにあるコア数ごとのフォルダのパスを指定する
 ディレクトリごと及び全体に対し，以下の内容を表示
 - Max utilization: コンフィグファイルで設定した利用率
 - Number of .yaml files: 対象yamlファイルの数
-- Number of schedulable: Schedulableの数
-- Number of unschedulable: Unschedulableの数
-- Acceptance of schedulable: Schedulableの割合
+- Number of schedulable(true): Schedulable(true)の数
+- Number of unschedulable(false): Unschedulable(false)の数
+- Acceptance of schedulable(true): Schedulable(true)の割合
 
 グラフを作成し，表示/保存する
 - 縦軸：受理率 [resultがtrueの数/全体の数]
 - 横軸：利用率 [0.6 ~ 1.0]
 - 保存場所は `source_code/{アルゴリズム名}/OutputsResult`
 - ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
+  - 2013_ECRTS_basic_global_edfのとき，`Preemptive`と`NonPreemptive`の2つのグラフが生成される
 
 ```
 evaluator
