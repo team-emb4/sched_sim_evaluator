@@ -3,6 +3,7 @@ import sys
 import os
 
 from libs import util
+from libs.util import algorithm_list
 from libs import divide_files
 from libs import batch_simulation
 from libs import result_check
@@ -32,7 +33,12 @@ if __name__ == "__main__":
 
     # アルゴリズム名を取得
     algorithm = os.path.basename(os.path.dirname(args["simulator"]))
-    print("algorithm: " + algorithm)
+    if algorithm not in algorithm_list:
+        print("Algorithm name is not correct.")
+        exit(1)
+    else:
+        properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
+        print("algorithm: " + algorithm)
 
     # config下の各ファイル名から数値を抽出
     config_dir_path = os.path.abspath("../config")
@@ -87,8 +93,8 @@ if __name__ == "__main__":
         if not os.path.exists(f"{algorithm}/"):
             os.mkdir(f"{algorithm}/")
         DAGs_dirs = os.listdir("../DAGs/")
-        # 2020_RTSS_cpc_model_based_algorithmの場合はDAGファイルをそのまま配置
-        if algorithm == "2020_RTSS_cpc_model_based_algorithm":
+        # 入力DAGの形式がファイルの場合はDAGファイルをそのまま配置
+        if properties["input_DAG"] == "file":
             os.mkdir(f"{algorithm}/UsedDag/")
             command = "cp -r ../DAGs/{DAGs_dir}/DAGs/ {algorithm}/UsedDag/{DAGs_dir}"
             for DAGs_dir in DAGs_dirs:
@@ -98,7 +104,7 @@ if __name__ == "__main__":
                 )
                 print(full_command)
                 os.system(full_command)
-        else:  # それ以外のアルゴリズムの場合はファイルを分割して配置
+        else:  # 入力DAGの形式がフォルダの場合はファイルを分割して配置
             # divide_files.pyを実行
             print("----------Divide files----------")
             FOLDER_NUM = 1000  # 分割後のフォルダ数
@@ -141,8 +147,8 @@ if __name__ == "__main__":
 
     # result_check.pyを実行
     print("----------Result check----------")
-    # 2013_ECRTS_basic_global_edfの場合はノンプリエンプティブとプリエンプティブの結果をそれぞれカウント
-    if algorithm == "2013_ECRTS_basic_global_edf":
+    # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブの結果をそれぞれカウント
+    if properties["execution_mode"] == "two":
         print("----------NonPreemptive----------")
         result_check.count_results(f"{algorithm}/SchedResult/NonPreemptive/{core_num}-cores/")
         print("----------Preemptive----------")

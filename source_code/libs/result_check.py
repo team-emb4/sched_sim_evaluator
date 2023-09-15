@@ -4,6 +4,7 @@ import yaml
 import matplotlib.pyplot as plt
 
 from libs import util
+from libs.util import algorithm_list
 
 
 # カスタムタグの定義
@@ -69,13 +70,18 @@ def count_results(root_log_dir_path):
     algorithm_dir = root_log_dir_path.split("/SchedResult")[0]
 
     # アルゴリズムのディレクトリ名を取得
-    algorithm_name = os.path.basename(algorithm_dir)
-    # 2013_ECRTS_basic_global_edfの場合はノンプリエンプティブとプリエンプティブのどちらであるかを取得
-    if algorithm_name == "2013_ECRTS_basic_global_edf":
-        pre = os.path.basename(os.path.dirname(root_log_dir_path))
-        print("algorithm: " + algorithm_name + "-" + pre)
+    algorithm = os.path.basename(algorithm_dir)
+    if algorithm not in algorithm_list:
+        print("Algorithm name is not correct.")
+        exit(1)
     else:
-        print("algorithm: " + algorithm_name)
+        properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
+        # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブのどちらであるかを取得
+        if properties["execution_mode"] == "two":
+            pre = os.path.basename(os.path.dirname(root_log_dir_path))
+            print("algorithm: " + algorithm + "-" + pre)
+        else:
+            print("algorithm: " + algorithm)
 
     # 入力ディレクトリの中にあるディレクトリの数をカウント
     log_dir_count = len(os.listdir(root_log_dir_path))
@@ -93,6 +99,7 @@ def count_results(root_log_dir_path):
 
     # 入力ディレクトリの中にあるディレクトリごとに処理
     for i, log_dir in enumerate(dir_list):
+        print("Target directory: " + log_dir)
         # ディレクトリ名から数値を抽出
         number = util.extract_numbers_from_string(log_dir)
         if number is None:
@@ -103,7 +110,10 @@ def count_results(root_log_dir_path):
         log_dir = os.path.join(root_log_dir_path, log_dir)
         log_file_list = os.listdir(log_dir)
 
-        for file_name in log_file_list:
+        for j, file_name in enumerate(log_file_list):
+            # プログレスバーを表示
+            util.progress_bar(j, len(log_file_list))
+
             # ファイル名が".yaml"で終わる場合のみ処理
             if file_name.endswith(".yaml"):
                 yaml_count[i] += 1
@@ -112,8 +122,8 @@ def count_results(root_log_dir_path):
                 # ファイルからresultを確認
                 log_data = read_yaml_file(log_file_path)
 
-                # 2014_ECRTS_federated_originalの場合
-                if algorithm_name == "2014_ECRTS_federated_original":
+                # resultがSchedulableまたはUnschedulableで表される場合
+                if properties["result"] == "schedulability":
                     # resultが!Schedulableの場合
                     if isinstance(log_data["result"], SchedulableTag):
                         schedulable_count[i] += 1
@@ -123,7 +133,7 @@ def count_results(root_log_dir_path):
                     else:
                         print("Unknown Result")
 
-                else:  # それ以外のアルゴリズムの場合
+                else:  # resultがtrueまたはfalseで表される場合
                     # resultがtrueの場合
                     if log_data["result"]:
                         true_count[i] += 1
@@ -131,13 +141,17 @@ def count_results(root_log_dir_path):
                     else:
                         false_count[i] += 1
 
+        # プログレスバーを表示
+        util.progress_bar(1, 1)
+        print("")
+
     # カウント結果を表示
     accept = [0.0] * log_dir_count
     for i, subdir in enumerate(dir_list):
         print("Directory: {}".format(subdir))
         print("  Max utilization: {}".format(max_utilization[i]))
         print("  Number of .yaml files: {}".format(yaml_count[i]))
-        if algorithm_name == "2014_ECRTS_federated_original":
+        if properties["result"] == "schedulability":
             print("  Number of schedulable: {}".format(schedulable_count[i]))
             print("  Number of unschedulable: {}".format(unschedulable_count[i]))
             accept[i] = schedulable_count[i] / yaml_count[i]
@@ -152,7 +166,7 @@ def count_results(root_log_dir_path):
     # 全体の結果を表示
     print("Total:")
     print("  Number of .yaml files: {}".format(sum(yaml_count)))
-    if algorithm_name == "2014_ECRTS_federated_original":
+    if properties["result"] == "schedulability":
         print("  Number of schedulable: {}".format(sum(schedulable_count)))
         print("  Number of unschedulable: {}".format(sum(unschedulable_count)))
         print("  Acceptance of schedulable: {}".format(sum(schedulable_count) / sum(yaml_count)))
@@ -166,11 +180,14 @@ def count_results(root_log_dir_path):
     # ディレクトリ名からコア数を取得
     core = os.path.basename(root_log_dir_path)
 
-    # 縦軸: Acceptance of schedulable
+    # グラフの初期化
+    plt.figure()
+
+    # 縦軸: Acceptance of schedulable(true)
     # 横軸: Max utilization
     plt.plot(max_utilization, accept, marker="o", color="blue", linestyle="-")
     plt.xlabel("Max utilization")
-    if algorithm_name == "2014_ECRTS_federated_original":
+    if properties["result"] == "schedulability":
         plt.ylabel("Acceptance of schedulable")
     else:
         plt.ylabel("Acceptance of true")
@@ -179,12 +196,12 @@ def count_results(root_log_dir_path):
     os.makedirs(f"{algorithm_dir}/OutputsResult", exist_ok=True)
 
     # グラフを保存
-    if algorithm_name == "2013_ECRTS_basic_global_edf":
+    if properties["execution_mode"] == "two":
         plt.savefig(
-            f"{algorithm_dir}/OutputsResult/plot_accept_{algorithm_name}_{pre}_{core}-cores.png"
+            f"{algorithm_dir}/OutputsResult/plot_accept_{algorithm}_{pre}_{core}-cores.png"
         )
     else:
-        plt.savefig(f"{algorithm_dir}/OutputsResult/plot_accept_{algorithm_name}_{core}-cores.png")
+        plt.savefig(f"{algorithm_dir}/OutputsResult/plot_accept_{algorithm}_{core}-cores.png")
 
     # グラフを表示
     plt.show()

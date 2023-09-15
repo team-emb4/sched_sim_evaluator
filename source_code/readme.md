@@ -6,8 +6,8 @@ DAGファイルの生成，シミュレータの実行・評価までをまと�
 ## 実行方法
 
 ### 準備
-DAGファイル生成に用いるconfigファイルを以下の通りに配置する
-- configファイルの末尾の数字は最大利用率を表す
+- DAGファイル生成に用いるconfigファイルを以下の通りに配置する
+  - configファイルの末尾の数字は最大利用率を表す
 
 ```
 evaluator
@@ -17,6 +17,7 @@ evaluator
      - batch_simulation.py
      - divide_files.py
      - result_check.py
+     - util.py
  L config
    - basic_chain_based-10.yaml
    - basic_chain_based-09.yaml
@@ -24,6 +25,19 @@ evaluator
    - basic_chain_based-07.yaml
    - basic_chain_based-06.yaml
 ```
+
+- 使用するアルゴリズムのプロパティを設定する
+  - libsの中のutil.pyにある`algorithm_list`に書き込む
+  - プロパティ項目
+    - 入力DAGの形式："input_DAG"
+      - "file"：入力がDAGファイル
+      - "folder"：入力がDAGフォルダ
+    - 実行モードが何種類あるか："execution_mode"
+      - "one"：１度だけ実行
+      - "two"：PreemptiveとNonPreemptiveで実行
+    - 結果の形式："result"
+      - "schedulability"：resultがSchedulableまたはUnschedulableで表される場合
+      - "boolean"：resultがtrueまたはfalseで表される場合
 
 ### 実行
 DAGファイル生成アルゴリズムの実行フォルダパス(-d)，シミュレータ実行場所のパス(-s)，シミュレータ実行時のコア数(-c)を指定する
@@ -71,6 +85,9 @@ evaluator
          L Max_utilization-0.8
          L Max_utilization-0.7
          L Max_utilization-0.6
+     L Log (シミュレータ実行ログ)
+       -2023-07... (ログ.txt)
+       -2023-07... 
      L OutputsResult (評価結果)
        - plot_accept_{アルゴリズム名}_{コア数}-cores.png
  L config (configファイル)
@@ -89,12 +106,12 @@ evaluator
    L Max_utilization-0.6
 ```
 いくつかのアルゴリズムは，構造が若干異なる
-- 2013_ECRTS_basic_global_edf
+- ["execution_mode": "two"]であるアルゴリズム
   - `SchedResult`の中に`Preemptive`と`NonPreemptive`フォルダがある
 ```
 evaluator
  L source_code
-   L 2013_ECRTS_basic_global_edf
+   L {アルゴリズム名}
      L UsedDag (フォルダ分割後のDAGファイル)
      L SchedResult (シミュレータ実行結果)
        L Preemptive
@@ -108,16 +125,17 @@ evaluator
            L Max_utilization-0.6
        L NonPreemptive
          L {使ったコア数}-cores
+     L Log (シミュレータ実行ログ)
      L OutputsResult (評価結果)
        - plot_accept_{アルゴリズム名}_Preemptive_{コア数}-cores.png
        - plot_accept_{アルゴリズム名}_NonPreemptive_{コア数}-cores.png       
 ```
-- 2020_RTSS_cpc_model_based_algorithm
+- ["input_DAG": "file"]であるアルゴリズム
   - `UsedDag`の各利用率のフォルダの中に，DAGファイルがそのまま置いてある
 ```
 evaluator
  L source_code
-   L 2020_RTSS_cpc_model_based_algorithm
+   L {アルゴリズム名}
      L UsedDag (フォルダ分割後のDAGファイル)
        L Max_utilization-1.0
          - config.yaml
@@ -127,12 +145,21 @@ evaluator
        L Max_utilization-0.7
        L Max_utilization-0.6     
      L SchedResult (シミュレータ実行結果)
+     L Log (シミュレータ実行ログ)
      L OutputsResult (評価結果)
 ```
 
 
 ## 備考
-すでにDAGファイルやUseDagファイルが生成済みの場合は，生成をスキップする
+- 2023/09/15時点では，["input_DAG": "file"]かつ["execution_mode": "two"]であるアルゴリズムのシミュレータの動作確認は行っていません
+
+- すでにDAGファイルやUseDagファイルが生成済みの場合は，生成をスキップする
+
+- すでに指定したコア数のディレクトリがSchedResultに存在している場合，実行を続けるかどうかを確認する
+  - 続ける場合
+    - 現在存在しているディレクトリを削除し，始めから実行する
+  - 続けない場合
+    - プログラムが終了する
 
 - - -
 - - -
@@ -158,8 +185,8 @@ evaluator
 
   `cd evaluator/source_code`
 
-- divide_files.pyを用い，以下のようにdagファイルを配置する
-  - 2020_RTSS_cpc_model_based_algorithmのときはdivide_files.pyを用いず，DAGファイルをそのまま配置する
+- ["input_DAG": "folder"]であるアルゴリズムはdivide_files.pyを用い，以下のようにdagファイルを配置する
+  - ["input_DAG": "file"]であるアルゴリズムはdivide_files.pyを用いず，DAGファイルをそのまま配置する
 
   `python3 divide_files.py -s ../DAGs/Max_utilization-O.X/DAGs/ -n 1000 -o {アルゴリズム名}/UsedDag/Max_utilization-O.X`
 
@@ -169,6 +196,7 @@ evaluator
 
 最終的に以下のようにファイルが配置される
 
+- ["input_DAG": "folder"]であるアルゴリズム
 ```
 evaluator
  L source_code
@@ -185,11 +213,11 @@ evaluator
        L Max_utilization-0.7
        L Max_utilization-0.6
 ```
-- 2020_RTSS_cpc_model_based_algorithmのとき
+- ["input_DAG": "file"]であるアルゴリズム
 ```
 evaluator
  L source_code
-   L 2020_RTSS_cpc_model_based_algorithm
+   L {アルゴリズム名}
      L UsedDag
        L Max_utilization-1.0
          - config.yaml
@@ -213,7 +241,7 @@ python3 batch_simulation.py -e {シミュレータ実行場所のパス} -d {ア
 
 ### 出力
 シミュレータの実行結果は，コア数ごとに`source_code/{アルゴリズム名}/SchedResult`のディレクトリに作成される
-- 2013_ECRTS_basic_global_edfのとき，`SchedResult`の中に`Preemptive`と`NonPreemptive`のフォルダがそれぞれ作成される
+- ["execution_mode": "two"]であるアルゴリズムは，`SchedResult`の中に`Preemptive`と`NonPreemptive`のフォルダがそれぞれ作成される
 
 ```
 evaluator
@@ -234,12 +262,15 @@ evaluator
           L Max_utilization-0.8
           L Max_utilization-0.7
           L Max_utilization-0.6
+     L Log (シミュレータ実行ログ)
+       -2023-07... (ログ.txt)
+       -2023-07... 
 ```
-- 2013_ECRTS_basic_global_edfのとき
+- ["execution_mode": "two"]であるアルゴリズム
 ```
 evaluator
  L source_code
-   L 2013_ECRTS_basic_global_edf
+   L {アルゴリズム名}
      L UsedDag
        L Max_utilization-1.0
        L Max_utilization-0.9
@@ -258,9 +289,19 @@ evaluator
            L Max_utilization-0.6
        L NonPreemptive
          L {使ったコア数}-cores
+     L Log (シミュレータ実行ログ)
+       -2023-07... (ログ.txt)
+       -2023-07... 
 ```
 
 ## 備考
+- 2023/09/15時点では，["input_DAG": "file"]かつ["execution_mode": "two"]であるアルゴリズムのシミュレータの動作確認は行っていません
+
+- すでに指定したコア数のディレクトリがSchedResultに存在している場合，実行を続けるかどうかを確認する
+  - 続ける場合
+    - 現在存在しているディレクトリを削除し，始めから実行する
+  - 続けない場合
+    - プログラムが終了する
 
 
 - - -
@@ -319,6 +360,9 @@ evaluator
           L Max_utilization-0.8
           L Max_utilization-0.7
           L Max_utilization-0.6
+     L Log (シミュレータ実行ログ)
+       -2023-07... (ログ.txt)
+       -2023-07... 
      L OutputsResult
        - plot_accept_{アルゴリズム名}_{コア数}-cores.png
 ```
