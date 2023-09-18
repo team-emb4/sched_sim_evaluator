@@ -72,16 +72,21 @@ def count_results(root_log_dir_path):
     # アルゴリズムのディレクトリ名を取得
     algorithm = os.path.basename(algorithm_dir)
     if algorithm not in algorithm_list:
-        print("Algorithm name is not correct.")
+        # 使用可能なアルゴリズム名を表示
+        util.print_log(
+            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
+        )
+        for key in algorithm_list.keys():
+            print(f"  {key}")
         exit(1)
     else:
         properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
         # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブのどちらであるかを取得
         if properties["execution_mode"] == "two":
             pre = os.path.basename(os.path.dirname(root_log_dir_path))
-            print("algorithm: " + algorithm + "-" + pre)
+            util.print_log("algorithm: " + algorithm + "-" + pre)
         else:
-            print("algorithm: " + algorithm)
+            util.print_log("algorithm: " + algorithm)
 
     # 入力ディレクトリの中にあるディレクトリの数をカウント
     log_dir_count = len(os.listdir(root_log_dir_path))
@@ -99,7 +104,7 @@ def count_results(root_log_dir_path):
 
     # 入力ディレクトリの中にあるディレクトリごとに処理
     for i, log_dir in enumerate(dir_list):
-        print("Target directory: " + log_dir)
+        util.print_log("Target directory: " + log_dir)
         # ディレクトリ名から数値を抽出
         number = util.extract_numbers_from_string(log_dir)
         if number is None:
@@ -148,32 +153,32 @@ def count_results(root_log_dir_path):
     # カウント結果を表示
     accept = [0.0] * log_dir_count
     for i, subdir in enumerate(dir_list):
-        print("Directory: {}".format(subdir))
-        print("  Max utilization: {}".format(max_utilization[i]))
-        print("  Number of .yaml files: {}".format(yaml_count[i]))
+        print(f"Directory: {subdir}")
+        print(f"  Max utilization: {max_utilization[i]}")
+        print(f"  Number of .yaml files: {yaml_count[i]}")
         if properties["result"] == "schedulability":
-            print("  Number of schedulable: {}".format(schedulable_count[i]))
-            print("  Number of unschedulable: {}".format(unschedulable_count[i]))
+            print(f"  Number of schedulable: {schedulable_count[i]}")
+            print(f"  Number of schedulable: {unschedulable_count[i]}")
             accept[i] = schedulable_count[i] / yaml_count[i]
-            print("  Acceptance of schedulable: {}".format(accept[i]))
+            print(f"  Acceptance of schedulable: {accept[i]}")
         else:
-            print("  Number of true: {}".format(true_count[i]))
-            print("  Number of false: {}".format(false_count[i]))
+            print(f"  Number of true: {true_count[i]}")
+            print(f"  Number of false: {false_count[i]}")
             accept[i] = true_count[i] / yaml_count[i]
-            print("  Acceptance of true: {}".format(accept[i]))
+            print(f"  Acceptance of true: {accept[i]}")
         print("")
 
     # 全体の結果を表示
     print("Total:")
-    print("  Number of .yaml files: {}".format(sum(yaml_count)))
+    print(f"  Number of directories: {sum(yaml_count)}")
     if properties["result"] == "schedulability":
-        print("  Number of schedulable: {}".format(sum(schedulable_count)))
-        print("  Number of unschedulable: {}".format(sum(unschedulable_count)))
-        print("  Acceptance of schedulable: {}".format(sum(schedulable_count) / sum(yaml_count)))
+        print(f"  Number of schedulable: {sum(schedulable_count)}")
+        print(f"  Number of unschedulable: {sum(unschedulable_count)}")
+        print(f"  Acceptance of schedulable: {sum(schedulable_count) / sum(yaml_count)}")
     else:
-        print("  Number of true: {}".format(sum(true_count)))
-        print("  Number of false: {}".format(sum(false_count)))
-        print("  Acceptance of true: {}".format(sum(true_count) / sum(yaml_count)))
+        print(f"  Number of true: {sum(true_count)}")
+        print(f"  Number of false: {sum(false_count)}")
+        print(f"  Acceptance of true: {sum(true_count) / sum(yaml_count)}")
     print("")
 
     # グラフを作成

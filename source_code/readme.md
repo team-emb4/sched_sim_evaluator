@@ -33,7 +33,7 @@ evaluator
       - "file"：入力がDAGファイル
       - "folder"：入力がDAGフォルダ
     - 実行モードが何種類あるか："execution_mode"
-      - "one"：１度だけ実行
+      - "one"：ノンプリエンプティブで実行
       - "two"：PreemptiveとNonPreemptiveで実行
     - 結果の形式："result"
       - "schedulability"：resultがSchedulableまたはUnschedulableで表される場合
@@ -334,7 +334,7 @@ SchedResultにあるコア数ごとのフォルダのパスを指定する
 - 横軸：利用率 [0.6 ~ 1.0]
 - 保存場所は `source_code/{アルゴリズム名}/OutputsResult`
 - ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
-  - 2013_ECRTS_basic_global_edfのとき，`Preemptive`と`NonPreemptive`の2つのグラフが生成される
+  - ["execution_mode": "two"]であるアルゴリズムは，`Preemptive`と`NonPreemptive`の2つのグラフが生成される
 
 ```
 evaluator

@@ -25,6 +25,9 @@ def option_parser(args):
 
 
 if __name__ == "__main__":
+    # 開始時間を取得し、開始ログを出力
+    start_time = util.print_log("Start")
+
     # 引数をパース
     args = option_parser(sys.argv[1:])
 
@@ -34,11 +37,16 @@ if __name__ == "__main__":
     # アルゴリズム名を取得
     algorithm = os.path.basename(os.path.dirname(args["simulator"]))
     if algorithm not in algorithm_list:
-        print("Algorithm name is not correct.")
+        # 使用可能なアルゴリズム名を表示
+        util.print_log(
+            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
+        )
+        for key in algorithm_list.keys():
+            print(f"  {key}")
         exit(1)
     else:
         properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
-        print("algorithm: " + algorithm)
+        util.print_log("algorithm: " + algorithm)
 
     # config下の各ファイル名から数値を抽出
     config_dir_path = os.path.abspath("../config")
@@ -55,13 +63,20 @@ if __name__ == "__main__":
     # DAGファイルの準備
     # DAGsフォルダがすでに存在する場合はスキップ
     if os.path.exists(f"{evaluator_dir_path}/DAGs/"):
-        print("----------DAGs folder already exists----------")
+        # 処理ログを出力
+        util.print_log("DAGs folder already exists")
     else:
         # DAGファイルを生成
-        print("----------Create DAGs----------")
+        # 処理ログを出力
+        util.print_log("Prepare DAGs folder")
+
         # RD-Genの実行パスが指定されていない場合はエラー
         if args["dag_creator"] is None:
-            print("Please specify the path to DAG creator.")
+            # DAGクリエイターのパスが指定されていません。-dオプションでDAGクリエイターの実行パスを指定してください。
+            util.print_log(
+                "DAG creator path is not specified. Please specify it with the -d option.",
+                log_kind="ERROR",
+            )
             exit(1)
 
         if not os.path.exists("../DAGs"):
@@ -80,16 +95,19 @@ if __name__ == "__main__":
             )
             print(full_command)
             os.system(full_command)
-        print("----------Finish----------")
 
     os.chdir(evaluator_dir_path + "/source_code")
 
     # UsedDagフォルダの準備
     # UsedDagフォルダがすでに存在する場合はスキップ
     if os.path.exists(f"{algorithm}/UsedDag/"):
-        print("----------UsedDag folder already exists----------")
+        # 処理ログを出力
+        util.print_log("UsedDag folder already exists")
     else:
-        print("----------Prepare UsedDag folder----------")
+        # 処理ログを出力
+        util.print_log("Prepare UsedDag folder")
+
+        # UsedDagフォルダを作成
         if not os.path.exists(f"{algorithm}/"):
             os.mkdir(f"{algorithm}/")
         DAGs_dirs = os.listdir("../DAGs/")
@@ -102,11 +120,13 @@ if __name__ == "__main__":
                     DAGs_dir=DAGs_dir,
                     algorithm=algorithm,
                 )
-                print(full_command)
+                # print(full_command) # :TODO debug
                 os.system(full_command)
         else:  # 入力DAGの形式がフォルダの場合はファイルを分割して配置
             # divide_files.pyを実行
-            print("----------Divide files----------")
+            # 処理ログを出力
+            util.print_log("Divide files")
+
             FOLDER_NUM = 1000  # 分割後のフォルダ数
             DAGs_dirs = os.listdir("../DAGs/")
             for DAGs_dir in DAGs_dirs:
@@ -115,7 +135,6 @@ if __name__ == "__main__":
                     num_folders=FOLDER_NUM,
                     output_folder_path=f"{algorithm}/UsedDag/{DAGs_dir}/",
                 )
-            print("----------Finish----------")
 
         # configファイルをコピー
         command = (
@@ -129,12 +148,13 @@ if __name__ == "__main__":
                 algorithm=algorithm,
                 utilization=max_utilization[i],
             )
-            print(full_command)
+            # print(full_command) # :TODO debug
             os.system(full_command)
-        print("----------Finish----------")
 
     # batch_simulation.pyを実行
-    print("----------Batch simulation----------")
+    # 処理ログを出力
+    util.print_log("Batch simulation")
+
     execute_simulator_path = os.path.abspath(args["simulator"])
     core_num = args["core_num"]
     batch_simulation.execute_command_in_subdirectories(
@@ -143,16 +163,17 @@ if __name__ == "__main__":
         core_num=core_num,
     )
     os.chdir(evaluator_dir_path + "/source_code")
-    print("----------Finish----------")
 
     # result_check.pyを実行
-    print("----------Result check----------")
+    # 処理ログを出力
+    util.print_log("Result check")
+
     # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブの結果をそれぞれカウント
     if properties["execution_mode"] == "two":
-        print("----------NonPreemptive----------")
         result_check.count_results(f"{algorithm}/SchedResult/NonPreemptive/{core_num}-cores/")
-        print("----------Preemptive----------")
         result_check.count_results(f"{algorithm}/SchedResult/Preemptive/{core_num}-cores/")
     else:
         result_check.count_results(f"{algorithm}/SchedResult/{core_num}-cores/")
-    print("----------Finish----------")
+
+    # 終了時間を取得し、終了ログとかかった時間を出力
+    util.print_log("End", start_time=start_time)

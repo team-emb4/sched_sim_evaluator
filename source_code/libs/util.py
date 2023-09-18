@@ -1,5 +1,6 @@
 import re
 import sys
+import datetime
 
 
 # 各アルゴリズムに対して、入力DAGの形式、実行モード、結果の形式を定義
@@ -54,3 +55,16 @@ def progress_bar(current, total, length=50):
     spaces = " " * (length - len(arrow))
     sys.stdout.write(f"\r[{arrow + spaces}] {int(progress * 100)}%")
     sys.stdout.flush()
+
+
+# ログを出力
+def print_log(message, log_kind="INFO", start_time=None):
+    now = datetime.datetime.now()
+    # 開始時間が指定されている場合はかかった時間をログに追加
+    if start_time is not None:
+        elapsed_time = now - start_time
+        # ミリ秒以下を削除
+        message += f" ({str(elapsed_time)[:-3]})"
+    print(f"{log_kind:<5s} {now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} {message}")
+    # 現在の時間を返す
+    return now
