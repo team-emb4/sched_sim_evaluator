@@ -143,7 +143,7 @@ def count_results(root_log_dir_path):
     else:
         print(f"  Number of true: {sum(true_count)}")
         print(f"  Number of false: {sum(false_count)}")
-        print(f"  Acceptance of true: {sum(true_count) / sum(yaml_count)}")
+        print(f"  Acceptance of true: {sum(true_count) / sum(yaml_count):.3f}")
     print("")
     print("==================================")
 
