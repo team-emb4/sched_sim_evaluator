@@ -66,7 +66,7 @@ if __name__ == "__main__":
     if os.path.exists(f"{evaluator_dir_path}/DAGs/"):
         # 処理ログを出力
         util.print_log("DAGs already exists. Skip generate DAG.")
-    else:      
+    else:
         # RD-Genの実行パスが指定されていない場合はエラー
         if args["dag_creator"] is None:
             util.print_log(
