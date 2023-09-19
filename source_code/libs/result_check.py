@@ -85,7 +85,7 @@ def count_results(root_log_dir_path):
     dir_list.sort()
     for i, log_dir in enumerate(dir_list):
         util.print_log("Target directory: " + log_dir)
-        utilization = util.extract_numbers_from_string(log_dir)
+        utilization = util.extract_utilization_from_config(log_dir)
         if utilization is None:
             continue
         max_utilization[i] = utilization

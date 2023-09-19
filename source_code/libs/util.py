@@ -33,14 +33,16 @@ algo_list = {
 
 
 # 文字列から数値を抽出
-def extract_numbers_from_string(input_string):
+def extract_utilization_from_config(input_string):
     pattern = r"\d+(\.\d+)?"
     match = re.search(pattern, input_string)
     if match:
         number = float(match.group())
         return number
     else:
-        return None
+        print_log("Usage: For a utilization of 0.6, "
+                  "the config file name must be config-06.yaml.", log_kind="ERROR")
+        exit(1)
 
 
 # プログレスバーを表示
