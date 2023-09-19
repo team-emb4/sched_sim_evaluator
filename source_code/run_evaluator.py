@@ -3,7 +3,7 @@ import sys
 import os
 
 from libs import util
-from libs.util import algo_list
+from libs.util import get_algorithm_properties
 from libs import divide_files
 from libs import batch_simulation
 from libs import result_check
@@ -25,16 +25,8 @@ if __name__ == "__main__":
     evaluator_dir_path = os.path.abspath("../")
 
     algo_name = os.path.basename(os.path.dirname(args["simulator"]))
-    if algo_name not in algo_list:
-        util.print_log(
-            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
-        )
-        for key in algo_list.keys():
-            print(f"  {key}")
-        exit(1)
-    else:
-        algo_properties = algo_list[algo_name]
-        util.print_log("Target algorithm: " + algo_name)
+    algo_properties = get_algorithm_properties(algo_name)
+    util.print_log("Target algorithm: " + algo_name)
 
     # config下の各ファイル名から利用率(数値)を抽出
     config_dir_path = os.path.abspath("../config")

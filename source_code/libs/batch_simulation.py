@@ -4,7 +4,7 @@ import argparse
 import datetime
 
 from libs import util
-from libs.util import algo_list
+from libs.util import get_algorithm_properties
 
 
 def option_parser(args):
@@ -35,16 +35,8 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     os.chdir(execute_dir)
     algo_name = os.path.basename(os.getcwd())
-    if algo_name not in algo_list:
-        util.print_log(
-            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
-        )
-        for key in algo_list.keys():
-            print(f"  {key}")
-        exit(1)
-    else:
-        algo_properties = algo_list[algo_name]
-        util.print_log("Target algorithm: " + algo_name)
+    algo_properties = get_algorithm_properties(algo_name)
+    util.print_log("Target algorithm: " + algo_name)
 
     output_root_dir = f"{current_dir}/{algo_name}/SchedResult/{core_num}-cores"
     match algo_properties:
@@ -101,7 +93,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
         if os.path.isdir(dagsets_dir_path):
             for i, input_dag in enumerate(os.listdir(dagsets_dir_path)):
                 util.progress_bar(i, len(os.listdir(dagsets_dir_path)))
-                input_dag_path = os.path.join(dagsets_dir_path, input_dag) 
+                input_dag_path = os.path.join(dagsets_dir_path, input_dag)
                 if (algo_properties["input"] == "DAG" and os.path.isfile(input_dag_path)) or (
                     algo_properties["input"] == "DAGSet" and os.path.isdir(input_dag_path)
                 ):

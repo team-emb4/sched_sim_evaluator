@@ -60,3 +60,15 @@ def print_log(message, log_kind="INFO", start_time=None):
         message += f" ({str(elapsed_time)[:-3]})"
     print(f"{log_kind:<5s}  : {now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} | {message}")
     return now
+
+
+# アルゴリズムのプロパティを取得
+def get_algorithm_properties(algo_name):
+    if algo_name not in algo_list:
+        print_log(
+            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
+        )
+        for key in algo_list.keys():
+            print(f"  {key}")
+        exit(1)
+    return algo_list[algo_name]

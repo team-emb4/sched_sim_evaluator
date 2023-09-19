@@ -4,7 +4,7 @@ import yaml
 import matplotlib.pyplot as plt
 
 from libs import util
-from libs.util import algo_list
+from libs.util import get_algorithm_properties
 
 
 # !Schedulableタグの定義
@@ -66,20 +66,12 @@ def count_results(root_log_dir_path):
 
     algo_dir = root_log_dir_path.split("/SchedResult")[0]
     algo_name = os.path.basename(algo_dir)
-    if algo_name not in algo_list:
-        util.print_log(
-            "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
-        )
-        for key in algo_list.keys():
-            print(f"  {key}")
-        exit(1)
+    algo_properties = get_algorithm_properties(algo_name)  # アルゴリズムのプロパティを取得
+    if algo_properties["preemptive"] == "true":
+        pre = os.path.basename(os.path.dirname(root_log_dir_path))
+        util.print_log("Target algorithm: " + algo_name + "-" + pre)
     else:
-        algo_properties = algo_list[algo_name]  # アルゴリズムのプロパティを取得
-        if algo_properties["preemptive"] == "true":
-            pre = os.path.basename(os.path.dirname(root_log_dir_path))
-            util.print_log("Target algorithm: " + algo_name + "-" + pre)
-        else:
-            util.print_log("Target algorithm: " + algo_name)
+        util.print_log("Target algorithm: " + algo_name)
 
     log_dir_count = len(os.listdir(root_log_dir_path))
     max_utilization = [0] * log_dir_count
