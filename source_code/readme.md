@@ -1,4 +1,4 @@
-# run_simulation.py
+# run_evaluator.py
 
 ## 概要
 DAGファイルの生成，シミュレータの実行・評価までをまとめて行う
@@ -12,7 +12,7 @@ DAGファイルの生成，シミュレータの実行・評価までをまと�
 ```
 evaluator
  L source_code
-   - run_simulation.py
+   - run_evaluator.py
    L libs
      - batch_simulation.py
      - divide_files.py
@@ -44,7 +44,7 @@ DAGファイル生成アルゴリズムの実行フォルダパス(-d)，シミ�
 - すでにDAGファイルが生成済みの場合は，-dを指定しなくてもよい
 
 ```
-python3 run_simulation.py [-d {DAGファイル生成アルゴリズムの実行フォルダパス}] -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
+python3 run_evaluator.py [-d {DAGファイル生成アルゴリズムの実行フォルダパス}] -s {シミュレータ実行場所のパス} -c {シミュレータ実行時のコア数}
 ```
 
 ### 出力

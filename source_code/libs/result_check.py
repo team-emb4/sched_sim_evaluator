@@ -151,6 +151,7 @@ def count_results(root_log_dir_path):
         print("")
 
     # カウント結果を表示
+    print("==============Result==============")
     accept = [0.0] * log_dir_count
     for i, subdir in enumerate(dir_list):
         print(f"Directory: {subdir}")
@@ -180,7 +181,7 @@ def count_results(root_log_dir_path):
         print(f"  Number of false: {sum(false_count)}")
         print(f"  Acceptance of true: {sum(true_count) / sum(yaml_count)}")
     print("")
-
+    print("==================================")
     # グラフを作成
     # ディレクトリ名からコア数を取得
     core = os.path.basename(root_log_dir_path)

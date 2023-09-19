@@ -26,7 +26,7 @@ def option_parser(args):
 
 if __name__ == "__main__":
     # 開始時間を取得し、開始ログを出力
-    start_time = util.print_log("Start")
+    start_time = util.print_log("==============Start run_evaluator.py==============")
 
     # 引数をパース
     args = option_parser(sys.argv[1:])
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         exit(1)
     else:
         properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
-        util.print_log("algorithm: " + algorithm)
+        util.print_log("Target algorithm: " + algorithm)
 
     # config下の各ファイル名から数値を抽出
     config_dir_path = os.path.abspath("../config")
@@ -61,18 +61,14 @@ if __name__ == "__main__":
         max_utilization[i] = number / 10
 
     # DAGファイルの準備
+    util.print_log("==============Generate DAG==============")
     # DAGsフォルダがすでに存在する場合はスキップ
     if os.path.exists(f"{evaluator_dir_path}/DAGs/"):
         # 処理ログを出力
-        util.print_log("DAGs folder already exists")
-    else:
-        # DAGファイルを生成
-        # 処理ログを出力
-        util.print_log("Prepare DAGs folder")
-
+        util.print_log("DAGs already exists. Skip generate DAG.")
+    else:      
         # RD-Genの実行パスが指定されていない場合はエラー
         if args["dag_creator"] is None:
-            # DAGクリエイターのパスが指定されていません。-dオプションでDAGクリエイターの実行パスを指定してください。
             util.print_log(
                 "DAG creator path is not specified. Please specify it with the -d option.",
                 log_kind="ERROR",
@@ -100,13 +96,11 @@ if __name__ == "__main__":
 
     # UsedDagフォルダの準備
     # UsedDagフォルダがすでに存在する場合はスキップ
+    util.print_log("==============Prepare UsedDag==============")
     if os.path.exists(f"{algorithm}/UsedDag/"):
         # 処理ログを出力
-        util.print_log("UsedDag folder already exists")
+        util.print_log("UsedDag already exists. Skip prepare UsedDag.")
     else:
-        # 処理ログを出力
-        util.print_log("Prepare UsedDag folder")
-
         # UsedDagフォルダを作成
         if not os.path.exists(f"{algorithm}/"):
             os.mkdir(f"{algorithm}/")
@@ -153,7 +147,7 @@ if __name__ == "__main__":
 
     # batch_simulation.pyを実行
     # 処理ログを出力
-    util.print_log("Batch simulation")
+    util.print_log("==============Batch simulation==============")
 
     execute_simulator_path = os.path.abspath(args["simulator"])
     core_num = args["core_num"]
@@ -166,7 +160,7 @@ if __name__ == "__main__":
 
     # result_check.pyを実行
     # 処理ログを出力
-    util.print_log("Result check")
+    util.print_log("==============Result check==============")
 
     # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブの結果をそれぞれカウント
     if properties["execution_mode"] == "two":
@@ -176,4 +170,5 @@ if __name__ == "__main__":
         result_check.count_results(f"{algorithm}/SchedResult/{core_num}-cores/")
 
     # 終了時間を取得し、終了ログとかかった時間を出力
-    util.print_log("End", start_time=start_time)
+    util.print_log("==============End run_evaluator.py==============")
+    util.print_log("Evaluation time: ", start_time=start_time)

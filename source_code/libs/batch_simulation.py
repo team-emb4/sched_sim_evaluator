@@ -52,7 +52,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
         exit(1)
     else:
         properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
-        util.print_log("algorithm: " + algorithm)
+        util.print_log("Target algorithm: " + algorithm)
 
     # スケジュール結果の出力先のディレクトリパス
     output_root_dir = f"{current_dir}/{algorithm}/SchedResult/{core_num}-cores"
@@ -77,23 +77,25 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
             util.print_log("Algorithm properties are not correct.", log_kind="ERROR")
             exit(1)
 
+    util.print_log(f"Core number: {core_num}")
+
     # SchedResultに指定したコア数のディレクトリがすでに存在する場合は、実行を続けるかどうかを確認
     # 実行を続ける場合は、すでに存在するディレクトリを削除
     if (properties["execution_mode"] == "two" and os.path.exists(nonpre_output_root_dir)) or (
         properties["execution_mode"] == "one" and os.path.exists(output_root_dir)
     ):
-        util.print_log(f"{core_num}-cores directory already exists.")
-        print("Do you want to continue and delete the existing directory? (y/n)")
+        util.print_log(f"Simulation results for {core_num}-core are already exists.")
+        util.print_log("Do you want to continue and delete the existing results? (y/n)")
         answer = input()
         if answer == "y" or answer == "Y":
-            print("Continue and delete the existing directory")
+            util.print_log("Deleted the existing results")
             if properties["execution_mode"] == "two":
                 os.system(f"rm -rf {nonpre_output_root_dir}")
                 os.system(f"rm -rf {preempt_output_root_dir}")
             else:
                 os.system(f"rm -rf {output_root_dir}")
         else:
-            print("Exit.")
+            util.print_log("Exit.")
             exit(1)
 
     # log出力ディレクトリを作成
@@ -105,6 +107,8 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     # コマンドの最後にリダイレクトを追加
     command += " >> {log_file} 2>&1"
+
+    util.print_log("==============Start simulation==============")
 
     for dagsets_dir in os.listdir(dagsets_root_dir):
         util.print_log("Target directory: " + dagsets_dir)

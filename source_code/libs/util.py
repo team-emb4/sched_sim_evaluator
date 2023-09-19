@@ -65,6 +65,6 @@ def print_log(message, log_kind="INFO", start_time=None):
         elapsed_time = now - start_time
         # ミリ秒以下を削除
         message += f" ({str(elapsed_time)[:-3]})"
-    print(f"{log_kind:<5s} {now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} {message}")
+    print(f"{log_kind:<5s}  : {now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} | {message}")
     # 現在の時間を返す
     return now
