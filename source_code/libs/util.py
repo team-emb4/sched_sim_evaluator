@@ -7,7 +7,7 @@ import datetime
 # "input_DAG": "file" or "folder"
 # "execution_mode": "one" or "two"
 # "result": "schedulability" or "boolean"
-algorithm_list = {
+algo_list = {
     "2014_ECRTS_federated_original": {
         "input_DAG": "folder",
         "execution_mode": "one",

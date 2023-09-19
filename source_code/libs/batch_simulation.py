@@ -4,7 +4,7 @@ import argparse
 import datetime
 
 from libs import util
-from libs.util import algorithm_list
+from libs.util import algo_list
 
 
 def option_parser(args):
@@ -26,11 +26,8 @@ def option_parser(args):
 
 
 def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
-    # 実行時の時間を取得
     now = datetime.datetime.now()
     seconds = now.strftime("%Y-%m-%d-%H-%M-%S")
-
-    # 現在のディレクトリを取得
     current_dir = os.getcwd()
 
     # 入力DAGSet群のルートディレクトリの絶対パスを取得
@@ -42,16 +39,16 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     # 現在のディレクトリ名を取得
     algorithm = os.path.basename(os.getcwd())
-    if algorithm not in algorithm_list:
+    if algorithm not in algo_list:
         # 使用可能なアルゴリズム名を表示
         util.print_log(
             "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
         )
-        for key in algorithm_list.keys():
+        for key in algo_list.keys():
             print(f"  {key}")
         exit(1)
     else:
-        properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
+        properties = algo_list[algorithm]  # アルゴリズムのプロパティを取得
         util.print_log("Target algorithm: " + algorithm)
 
     # スケジュール結果の出力先のディレクトリパス

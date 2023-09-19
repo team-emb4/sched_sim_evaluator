@@ -4,7 +4,7 @@ import yaml
 import matplotlib.pyplot as plt
 
 from libs import util
-from libs.util import algorithm_list
+from libs.util import algo_list
 
 
 # カスタムタグの定義
@@ -71,16 +71,16 @@ def count_results(root_log_dir_path):
 
     # アルゴリズムのディレクトリ名を取得
     algorithm = os.path.basename(algorithm_dir)
-    if algorithm not in algorithm_list:
+    if algorithm not in algo_list:
         # 使用可能なアルゴリズム名を表示
         util.print_log(
             "Algorithm name is not correct. Available algorithm names are:", log_kind="ERROR"
         )
-        for key in algorithm_list.keys():
+        for key in algo_list.keys():
             print(f"  {key}")
         exit(1)
     else:
-        properties = algorithm_list[algorithm]  # アルゴリズムのプロパティを取得
+        properties = algo_list[algorithm]  # アルゴリズムのプロパティを取得
         # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブのどちらであるかを取得
         if properties["execution_mode"] == "two":
             pre = os.path.basename(os.path.dirname(root_log_dir_path))
