@@ -34,13 +34,8 @@ algo_list = {
 
 # 文字列から数値を抽出
 def extract_numbers_from_string(input_string):
-    # 正規表現パターン: 数字の連続した部分を抽出
     pattern = r"\d+(\.\d+)?"
-
-    # 正規表現にマッチする部分を取得
     match = re.search(pattern, input_string)
-
-    # マッチした部分を数値に変換して返す
     if match:
         number = float(match.group())
         return number
@@ -60,11 +55,8 @@ def progress_bar(current, total, length=50):
 # ログを出力
 def print_log(message, log_kind="INFO", start_time=None):
     now = datetime.datetime.now()
-    # 開始時間が指定されている場合はかかった時間をログに追加
     if start_time is not None:
         elapsed_time = now - start_time
-        # ミリ秒以下を削除
         message += f" ({str(elapsed_time)[:-3]})"
     print(f"{log_kind:<5s}  : {now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} | {message}")
-    # 現在の時間を返す
     return now
