@@ -4,29 +4,29 @@ import datetime
 
 
 # 各アルゴリズムに対して、入力DAGの形式、実行モード、結果の形式を定義
-# "input_DAG": "file" or "folder"
-# "execution_mode": "one" or "two"
+# "input": "DAG" or "DAGSet"
+# "preemptive": "false" or "true"
 # "result": "schedulability" or "boolean"
 algo_list = {
     "2014_ECRTS_federated_original": {
-        "input_DAG": "folder",
-        "execution_mode": "one",
+        "input": "DAGSet",
+        "preemptive": "false",
         "result": "schedulability",
     },
-    "2021_RTCSA_dynfed": {"input_DAG": "folder", "execution_mode": "one", "result": "boolean"},
+    "2021_RTCSA_dynfed": {"input": "DAGSet", "preemptive": "false", "result": "boolean"},
     "2013_ECRTS_basic_global_edf": {
-        "input_DAG": "folder",
-        "execution_mode": "two",
+        "input": "DAGSet",
+        "preemptive": "true",
         "result": "boolean",
     },
     "2014_TPDS_basic_decomposition_based_algorithm": {
-        "input_DAG": "folder",
-        "execution_mode": "two",
+        "input": "DAGSet",
+        "preemptive": "true",
         "result": "boolean",
     },
     "2020_RTSS_cpc_model_based_algorithm": {
-        "input_DAG": "file",
-        "execution_mode": "one",
+        "input": "DAG",
+        "preemptive": "false",
         "result": "boolean",
     },
 }

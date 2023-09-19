@@ -29,12 +29,12 @@ evaluator
 - 使用するアルゴリズムのプロパティを設定する
   - libsの中のutil.pyにある`algorithm_list`に書き込む
   - プロパティ項目
-    - 入力DAGの形式："input_DAG"
-      - "file"：入力がDAGファイル
-      - "folder"：入力がDAGフォルダ
-    - 実行モードが何種類あるか："execution_mode"
-      - "one"：ノンプリエンプティブで実行
-      - "two"：PreemptiveとNonPreemptiveで実行
+    - 入力DAGの形式："input"
+      - "DAG"：入力がDAGファイル
+      - "DAGSet"：入力がDAGフォルダ
+    - 実行モードが何種類あるか："preemptive"
+      - "false"：NonPreemptiveで実行
+      - "true"：PreemptiveとNonPreemptiveで実行
     - 結果の形式："result"
       - "schedulability"：resultがSchedulableまたはUnschedulableで表される場合
       - "boolean"：resultがtrueまたはfalseで表される場合
@@ -106,7 +106,7 @@ evaluator
    L Max_utilization-0.6
 ```
 いくつかのアルゴリズムは，構造が若干異なる
-- ["execution_mode": "two"]であるアルゴリズム
+- ["preemptive": "true"]であるアルゴリズム
   - `SchedResult`の中に`Preemptive`と`NonPreemptive`フォルダがある
 ```
 evaluator
@@ -130,7 +130,7 @@ evaluator
        - plot_accept_{アルゴリズム名}_Preemptive_{コア数}-cores.png
        - plot_accept_{アルゴリズム名}_NonPreemptive_{コア数}-cores.png       
 ```
-- ["input_DAG": "file"]であるアルゴリズム
+- ["input": "DAG"]であるアルゴリズム
   - `UsedDag`の各利用率のフォルダの中に，DAGファイルがそのまま置いてある
 ```
 evaluator
@@ -151,7 +151,7 @@ evaluator
 
 
 ## 備考
-- 2023/09/15時点では，["input_DAG": "file"]かつ["execution_mode": "two"]であるアルゴリズムのシミュレータの動作確認は行っていません
+- 2023/09/15時点では，["input": "DAG"]かつ["preemptive": "true"]であるアルゴリズムのシミュレータの動作確認は行っていません
 
 - すでにDAGファイルやUseDagファイルが生成済みの場合は，生成をスキップする
 
@@ -185,8 +185,8 @@ evaluator
 
   `cd evaluator/source_code`
 
-- ["input_DAG": "folder"]であるアルゴリズムはdivide_files.pyを用い，以下のようにdagファイルを配置する
-  - ["input_DAG": "file"]であるアルゴリズムはdivide_files.pyを用いず，DAGファイルをそのまま配置する
+- ["input": "DAGSet"]であるアルゴリズムはdivide_files.pyを用い，以下のようにdagファイルを配置する
+  - ["input": "DAG"]であるアルゴリズムはdivide_files.pyを用いず，DAGファイルをそのまま配置する
 
   `python3 divide_files.py -s ../DAGs/Max_utilization-O.X/DAGs/ -n 1000 -o {アルゴリズム名}/UsedDag/Max_utilization-O.X`
 
@@ -196,7 +196,7 @@ evaluator
 
 最終的に以下のようにファイルが配置される
 
-- ["input_DAG": "folder"]であるアルゴリズム
+- ["input": "DAGSet"]であるアルゴリズム
 ```
 evaluator
  L source_code
@@ -213,7 +213,7 @@ evaluator
        L Max_utilization-0.7
        L Max_utilization-0.6
 ```
-- ["input_DAG": "file"]であるアルゴリズム
+- ["input": "DAG"]であるアルゴリズム
 ```
 evaluator
  L source_code
@@ -241,7 +241,7 @@ python3 batch_simulation.py -e {シミュレータ実行場所のパス} -d {ア
 
 ### 出力
 シミュレータの実行結果は，コア数ごとに`source_code/{アルゴリズム名}/SchedResult`のディレクトリに作成される
-- ["execution_mode": "two"]であるアルゴリズムは，`SchedResult`の中に`Preemptive`と`NonPreemptive`のフォルダがそれぞれ作成される
+- ["preemptive": "true"]であるアルゴリズムは，`SchedResult`の中に`Preemptive`と`NonPreemptive`のフォルダがそれぞれ作成される
 
 ```
 evaluator
@@ -266,7 +266,7 @@ evaluator
        -2023-07... (ログ.txt)
        -2023-07... 
 ```
-- ["execution_mode": "two"]であるアルゴリズム
+- ["preemptive": "true"]であるアルゴリズム
 ```
 evaluator
  L source_code
@@ -295,7 +295,7 @@ evaluator
 ```
 
 ## 備考
-- 2023/09/15時点では，["input_DAG": "file"]かつ["execution_mode": "two"]であるアルゴリズムのシミュレータの動作確認は行っていません
+- 2023/09/15時点では，["input": "DAG"]かつ["preemptive": "true"]であるアルゴリズムのシミュレータの動作確認は行っていません
 
 - すでに指定したコア数のディレクトリがSchedResultに存在している場合，実行を続けるかどうかを確認する
   - 続ける場合
@@ -334,7 +334,7 @@ SchedResultにあるコア数ごとのフォルダのパスを指定する
 - 横軸：利用率 [0.6 ~ 1.0]
 - 保存場所は `source_code/{アルゴリズム名}/OutputsResult`
 - ファイル名は `plot_accept_{アルゴリズム名}_{コア数}-cores.png`
-  - ["execution_mode": "two"]であるアルゴリズムは，`Preemptive`と`NonPreemptive`の2つのグラフが生成される
+  - ["preemptive": "true"]であるアルゴリズムは，`Preemptive`と`NonPreemptive`の2つのグラフが生成される
 
 ```
 evaluator

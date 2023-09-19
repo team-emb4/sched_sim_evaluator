@@ -82,7 +82,7 @@ def count_results(root_log_dir_path):
     else:
         properties = algo_list[algorithm]  # アルゴリズムのプロパティを取得
         # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブのどちらであるかを取得
-        if properties["execution_mode"] == "two":
+        if properties["preemptive"] == "true":
             pre = os.path.basename(os.path.dirname(root_log_dir_path))
             util.print_log("algorithm: " + algorithm + "-" + pre)
         else:
@@ -202,7 +202,7 @@ def count_results(root_log_dir_path):
     os.makedirs(f"{algorithm_dir}/OutputsResult", exist_ok=True)
 
     # グラフを保存
-    if properties["execution_mode"] == "two":
+    if properties["preemptive"] == "true":
         plt.savefig(
             f"{algorithm_dir}/OutputsResult/plot_accept_{algorithm}_{pre}_{core}-cores.png"
         )

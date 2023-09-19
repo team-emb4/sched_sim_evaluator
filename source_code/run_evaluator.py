@@ -85,7 +85,7 @@ if __name__ == "__main__":
             os.mkdir(f"{algo_name}/")
         DAGs_dirs = os.listdir("../DAGs/")
 
-        if algo_properties["input_DAG"] == "file":  # 入力DAGの形式がファイルの場合はDAGファイルをそのまま配置
+        if algo_properties["input"] == "DAG":  # 入力DAGの形式がファイルの場合はDAGファイルをそのまま配置
             os.mkdir(f"{algo_name}/UsedDag/")
             command = "cp -r ../DAGs/{DAGs_dir}/DAGs/ {algorithm}/UsedDag/{DAGs_dir}"
             for DAGs_dir in DAGs_dirs:
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     os.chdir(evaluator_dir_path + "/source_code")
 
     util.print_log("==============Result check==============")
-    if algo_properties["execution_mode"] == "two":
+    if algo_properties["preemptive"] == "true":
         result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
         result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")
     else:

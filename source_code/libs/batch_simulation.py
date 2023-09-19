@@ -56,19 +56,19 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     # アルゴリズムごとに実行するコマンドを変更
     match properties:
-        case {"input_DAG": "folder", "execution_mode": "one"}:
-            command = "cargo run -- -d {input_DAG} -c {core} -o {output_dir}"
-        case {"input_DAG": "folder", "execution_mode": "two"}:
-            command = "cargo run -- -d {input_DAG} -c {core} -o {output_dir} {preempt}"
+        case {"input": "DAGSet", "preemptive": "false"}:
+            command = "cargo run -- -d {input} -c {core} -o {output_dir}"
+        case {"input": "DAGSet", "preemptive": "true"}:
+            command = "cargo run -- -d {input} -c {core} -o {output_dir} {preempt}"
             nonpre_output_root_dir = (
                 f"{current_dir}/{algorithm}/SchedResult/NonPreemptive/{core_num}-cores"
             )
             preempt_output_root_dir = (
                 f"{current_dir}/{algorithm}/SchedResult/Preemptive/{core_num}-cores"
             )
-        case {"input_DAG": "file", "execution_mode": "one"}:
+        case {"input": "DAG", "preemptive": "false"}:
             # command = "cargo run -- -f {input_file} -c {core} -o {output_dir} -r {ratio}"
-            command = "cargo run -- -f {input_DAG} -c {core} -o {output_dir}"
+            command = "cargo run -- -f {input} -c {core} -o {output_dir}"
         case _:  # それ以外の場合はエラー
             # アルゴリズムのプロパティが正しく設定されていない場合はエラー
             util.print_log("Algorithm properties are not correct.", log_kind="ERROR")
@@ -78,15 +78,15 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
     # SchedResultに指定したコア数のディレクトリがすでに存在する場合は、実行を続けるかどうかを確認
     # 実行を続ける場合は、すでに存在するディレクトリを削除
-    if (properties["execution_mode"] == "two" and os.path.exists(nonpre_output_root_dir)) or (
-        properties["execution_mode"] == "one" and os.path.exists(output_root_dir)
+    if (properties["preemptive"] == "true" and os.path.exists(nonpre_output_root_dir)) or (
+        properties["preemptive"] == "false" and os.path.exists(output_root_dir)
     ):
         util.print_log(f"Simulation results for {core_num}-core are already exists.")
         util.print_log("Do you want to continue and delete the existing results? (y/n)")
         answer = input()
         if answer == "y" or answer == "Y":
             util.print_log("Deleted the existing results")
-            if properties["execution_mode"] == "two":
+            if properties["preemptive"] == "true":
                 os.system(f"rm -rf {nonpre_output_root_dir}")
                 os.system(f"rm -rf {preempt_output_root_dir}")
             else:
@@ -110,7 +110,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
     for dagsets_dir in os.listdir(dagsets_root_dir):
         util.print_log("Target directory: " + dagsets_dir)
         # 実行モードを表示
-        if properties["execution_mode"] == "two":
+        if properties["preemptive"] == "true":
             util.print_log("Execution mode: NonPreemptive and Preemptive")
         else:
             util.print_log("Execution mode: NonPreemptive")
@@ -125,15 +125,15 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
                 input_dag_path = os.path.join(dagsets_dir_path, input_dag)  # 入力DAGのパス
 
                 # プロパティと入力DAGの形式が一致している場合のみ実行
-                if (properties["input_DAG"] == "file" and os.path.isfile(input_dag_path)) or (
-                    properties["input_DAG"] == "folder" and os.path.isdir(input_dag_path)
+                if (properties["input"] == "DAG" and os.path.isfile(input_dag_path)) or (
+                    properties["input"] == "DAGSet" and os.path.isdir(input_dag_path)
                 ):
                     # DAGファイルでない場合はスキップ
                     if os.path.isfile(input_dag_path) and not input_dag.startswith("dag_"):
                         continue
 
                     # 実行モードが2種類ある場合はノンプリエンプティブとプリエンプティブで実行
-                    if properties["execution_mode"] == "two":
+                    if properties["preemptive"] == "true":
                         # 利用率ごとの結果出力先のサブディレクトリを作成
                         # ノンプリエンプティブ用の出力先
                         nonpre_output_dir = os.path.join(nonpre_output_root_dir, dagsets_dir)
@@ -144,7 +144,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
                         # ノンプリエンプティブで実行
                         full_command = command.format(
-                            input_DAG=input_dag_path,
+                            input=input_dag_path,
                             core=core_num,
                             output_dir=nonpre_output_dir,
                             preempt="",
@@ -154,7 +154,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
                         # プリエンプティブで実行
                         full_command = command.format(
-                            input_DAG=input_dag_path,
+                            input=input_dag_path,
                             core=core_num,
                             output_dir=preempt_output_dir,
                             preempt="-p",
@@ -169,7 +169,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
 
                         # 実行
                         full_command = command.format(
-                            input_DAG=input_dag_path,
+                            input=input_dag_path,
                             core=core_num,
                             output_dir=output_dir,
                             log_file=log_file,
