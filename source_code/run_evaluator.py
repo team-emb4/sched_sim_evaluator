@@ -76,7 +76,6 @@ if __name__ == "__main__":
         else:  # 入力がDAGSetの場合はファイルを分割して配置
             util.print_log("Divide files")
             DIR_NUM = 1000  # 分割後のフォルダ数
-            DAGs_dir_list = os.listdir("../DAGs/")
             for DAGs_dir in DAGs_dir_list:
                 divide_files.divide_dag_files_to_dirs(
                     input_dir_path=f"../DAGs/{DAGs_dir}/DAGs/",
