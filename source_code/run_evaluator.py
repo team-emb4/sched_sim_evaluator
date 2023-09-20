@@ -5,8 +5,8 @@ import os
 from libs import util
 from libs.util import get_algorithm_properties
 from libs import divide_files
-# from libs import batch_simulation
-# from libs import result_check
+from libs import batch_simulation
+from libs import result_check
 
 
 def option_parser(args):
@@ -98,22 +98,22 @@ if __name__ == "__main__":
             )
             os.system(full_command)
 
-    # util.print_log("==============Batch simulation==============")
-    # core_num = args["core_num"]
-    # batch_simulation.execute_command_in_subdirectories(
-    #     execute_dir=os.path.abspath(args["simulator"]),
-    #     dagsets_root_dir=f"{algo_name}/UsedDag/",
-    #     core_num=core_num,
-    # )
-    # os.chdir(evaluator_path + "/source_code")
+    util.print_log("==============Batch simulation==============")
+    core_num = args["core_num"]
+    batch_simulation.execute_command_in_subdirectories(
+        execute_dir=os.path.abspath(args["simulator"]),
+        dagsets_root_dir=f"{algo_name}/UsedDag/",
+        core_num=core_num,
+    )
+    os.chdir(evaluator_path + "/source_code")
 
-    # util.print_log("==============Result check==============")
-    # core_num = args["core_num"]
-    # if algo_properties["preemptive"] == "true":
-    #     result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
-    #     result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")
-    # else:
-    #     result_check.count_results(f"{algo_name}/SchedResult/{core_num}-cores/")
+    util.print_log("==============Result check==============")
+    core_num = args["core_num"]
+    if algo_properties["preemptive"] == "true":
+        result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
+        result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")
+    else:
+        result_check.count_results(f"{algo_name}/SchedResult/{core_num}-cores/")
 
     util.print_log("==============End run_evaluator.py==============")
     util.print_log("Evaluation time: ", start_time=start_time)
