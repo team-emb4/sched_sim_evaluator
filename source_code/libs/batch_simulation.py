@@ -45,7 +45,7 @@ def run_simulation_for_all_inputs(simulator_dir, root_input_tasks_dir, core_num)
         case {"input": "DAG", "preemptive": "false"}:
             command = "cargo run -- -f {input} -c {core} -o {output_dir}"
         case _: exit(1)
-    # command += " > /dev/null 2>&1"
+    command += " > /dev/null 2>&1"
 
     # 出力ルートディレクトリの作成
     output_root_dir = f"{cwd}/{algo_name}/SchedResult/{core_num}-cores"
@@ -88,7 +88,6 @@ def run_simulation_for_all_inputs(simulator_dir, root_input_tasks_dir, core_num)
             # configファイルはスキップ
             if os.path.isfile(input_task_path) and not input_task.startswith("dag_"):
                 continue
-            print("check")
             if algo_properties["preemptive"] == "true":
                 create_and_execute_command(command, nonpre_output_root_dir,
                                            input_tasks_dir, input_task_path, core_num)
