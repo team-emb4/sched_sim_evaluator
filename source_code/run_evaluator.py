@@ -100,9 +100,9 @@ if __name__ == "__main__":
 
     util.print_log("==============Batch simulation==============")
     core_num = args["core_num"]
-    batch_simulation.execute_command_in_subdirectories(
-        execute_dir=os.path.abspath(args["simulator"]),
-        dagsets_root_dir=f"{algo_name}/UsedDag/",
+    batch_simulation.run_simulation_for_all_inputs(
+        simulator_dir=os.path.abspath(args["simulator"]),
+        root_input_tasks_dir=f"{algo_name}/UsedDag/",
         core_num=core_num,
     )
     os.chdir(evaluator_path + "/source_code")
