@@ -5,8 +5,8 @@ import os
 from libs import util
 from libs.util import get_algorithm_properties
 from libs import divide_files
-from libs import batch_simulation
-from libs import result_check
+# from libs import batch_simulation
+# from libs import result_check
 
 
 def option_parser(args):
@@ -75,13 +75,13 @@ if __name__ == "__main__":
                 os.system(full_command)
         else:  # 入力がDAGSetの場合はファイルを分割して配置
             util.print_log("Divide files")
-            FOLDER_NUM = 1000  # 分割後のフォルダ数
+            DIR_NUM = 1000  # 分割後のフォルダ数
             DAGs_dir_list = os.listdir("../DAGs/")
             for DAGs_dir in DAGs_dir_list:
-                divide_files.divide_files_to_folders(
-                    source_folder=f"../DAGs/{DAGs_dir}/DAGs/",
-                    num_folders=FOLDER_NUM,
-                    output_folder_path=f"{algo_name}/UsedDag/{DAGs_dir}/",
+                divide_files.divide_dag_files_to_dirs(
+                    input_dir_path=f"../DAGs/{DAGs_dir}/DAGs/",
+                    num_dirs=DIR_NUM,
+                    output_dir_path=f"{algo_name}/UsedDag/{DAGs_dir}/",
                 )
 
         # configファイルをUsedDagにコピー
@@ -98,22 +98,22 @@ if __name__ == "__main__":
             )
             os.system(full_command)
 
-    util.print_log("==============Batch simulation==============")
-    core_num = args["core_num"]
-    batch_simulation.execute_command_in_subdirectories(
-        execute_dir=os.path.abspath(args["simulator"]),
-        dagsets_root_dir=f"{algo_name}/UsedDag/",
-        core_num=core_num,
-    )
-    os.chdir(evaluator_path + "/source_code")
+    # util.print_log("==============Batch simulation==============")
+    # core_num = args["core_num"]
+    # batch_simulation.execute_command_in_subdirectories(
+    #     execute_dir=os.path.abspath(args["simulator"]),
+    #     dagsets_root_dir=f"{algo_name}/UsedDag/",
+    #     core_num=core_num,
+    # )
+    # os.chdir(evaluator_path + "/source_code")
 
-    util.print_log("==============Result check==============")
-    core_num = args["core_num"]
-    if algo_properties["preemptive"] == "true":
-        result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
-        result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")
-    else:
-        result_check.count_results(f"{algo_name}/SchedResult/{core_num}-cores/")
+    # util.print_log("==============Result check==============")
+    # core_num = args["core_num"]
+    # if algo_properties["preemptive"] == "true":
+    #     result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
+    #     result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")
+    # else:
+    #     result_check.count_results(f"{algo_name}/SchedResult/{core_num}-cores/")
 
     util.print_log("==============End run_evaluator.py==============")
     util.print_log("Evaluation time: ", start_time=start_time)
