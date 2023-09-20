@@ -22,14 +22,13 @@ def option_parser(args):
 if __name__ == "__main__":
     start_time = util.print_log("==============Start run_evaluator.py==============")
     args = option_parser(sys.argv[1:])
-
     algo_name = os.path.basename(os.path.dirname(args["simulator"]))
     algo_properties = get_algorithm_properties(algo_name)
     util.print_log("Target algorithm: " + algo_name)
 
     util.print_log("==============Generate DAG==============")
-    config_paths = [os.path.join(os.path.abspath("../config"), file_name)
-                    for file_name in os.listdir("../config")]
+    config_path_list = [os.path.join(os.path.abspath("../config"), file_name)
+                        for file_name in os.listdir("../config")]
     evaluator_path = os.path.abspath("../")
     if os.path.exists(f"{evaluator_path}/DAGs/"):
         util.print_log("DAGs already exists. Skip generate DAG.")
@@ -44,17 +43,16 @@ if __name__ == "__main__":
         os.mkdir("../DAGs")
         os.chdir(os.path.abspath(args["RD_Gen"]))
         command_create_dags = (
-            "python3 run_generator.py -c {config} "
-            "-d {simulator_dir_path}/DAGs/Max_utilization-{utilization}"
+            "python3 run_generator.py -c {config_path} "
+            "-d {evaluator_path}/DAGs/Max_utilization-{utilization}"
         )
-        for config in config_paths:
+        for config_path in config_path_list:
             full_command = command_create_dags.format(
-                config=config,
-                simulator_dir_path=evaluator_path,
-                utilization=util.extract_utilization_from_config(os.path.basename(config)),
+                config_path=config_path,
+                evaluator_path=evaluator_path,
+                utilization=util.extract_utilization_from_name(os.path.basename(config_path)/10),
             )
             os.system(full_command)
-
     os.chdir(evaluator_path + "/source_code")
 
     util.print_log("==============Prepare UsedDag==============")
@@ -63,12 +61,13 @@ if __name__ == "__main__":
     else:
         if not os.path.exists(f"{algo_name}/"):
             os.mkdir(f"{algo_name}/")
-        DAGs_dirs = os.listdir("../DAGs/")
+        DAGs_dir_list = os.listdir("../DAGs/")
 
         if algo_properties["input"] == "DAG":  # 入力がDAGの場合はDAGファイルをそのまま配置
             os.mkdir(f"{algo_name}/UsedDag/")
+            util.print_log("Copy files")
             command = "cp -r ../DAGs/{DAGs_dir}/DAGs/ {algorithm}/UsedDag/{DAGs_dir}"
-            for DAGs_dir in DAGs_dirs:
+            for DAGs_dir in DAGs_dir_list:
                 full_command = command.format(
                     DAGs_dir=DAGs_dir,
                     algorithm=algo_name,
@@ -77,26 +76,25 @@ if __name__ == "__main__":
         else:  # 入力がDAGSetの場合はファイルを分割して配置
             util.print_log("Divide files")
             FOLDER_NUM = 1000  # 分割後のフォルダ数
-            DAGs_dirs = os.listdir("../DAGs/")
-            for DAGs_dir in DAGs_dirs:
+            DAGs_dir_list = os.listdir("../DAGs/")
+            for DAGs_dir in DAGs_dir_list:
                 divide_files.divide_files_to_folders(
                     source_folder=f"../DAGs/{DAGs_dir}/DAGs/",
                     num_folders=FOLDER_NUM,
                     output_folder_path=f"{algo_name}/UsedDag/{DAGs_dir}/",
                 )
 
+        # configファイルをUsedDagにコピー
         command = (
             "cp {config} "
             "{evaluator_dir_path}/source_code/{algorithm}/UsedDag/Max_utilization-{utilization}/"
         )
-
-        # configファイルをUsedDagにコピー
-        for config in config_paths:
+        for config_path in config_path_list:
             full_command = command.format(
-                config=config,
+                config=config_path,
                 evaluator_dir_path=evaluator_path,
                 algorithm=algo_name,
-                utilization=util.extract_utilization_from_config(os.path.basename(config))
+                utilization=(util.extract_utilization_from_name(os.path.basename(config_path))/10)
             )
             os.system(full_command)
 
@@ -110,6 +108,7 @@ if __name__ == "__main__":
     os.chdir(evaluator_path + "/source_code")
 
     util.print_log("==============Result check==============")
+    core_num = args["core_num"]
     if algo_properties["preemptive"] == "true":
         result_check.count_results(f"{algo_name}/SchedResult/NonPreemptive/{core_num}-cores/")
         result_check.count_results(f"{algo_name}/SchedResult/Preemptive/{core_num}-cores/")

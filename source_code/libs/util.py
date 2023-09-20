@@ -33,7 +33,7 @@ algo_list = {
 
 
 # 文字列から数値を抽出
-def extract_utilization_from_config(input_string):
+def extract_utilization_from_name(input_string):
     pattern = r"\d+(\.\d+)?"
     match = re.search(pattern, input_string)
     if match:

@@ -82,7 +82,7 @@ def execute_command_in_subdirectories(execute_dir, dagsets_root_dir, core_num):
     command += " >> {log_file} 2>&1"
 
     util.print_log("==============Start simulation==============")
-    for dagsets_dir in os.listdir(dagsets_root_dir):
+    for dagsets_dir in sorted(os.listdir(dagsets_root_dir)):
         util.print_log("Target directory: " + dagsets_dir)
         if algo_properties["preemptive"] == "true":
             util.print_log("Execution mode: NonPreemptive and Preemptive")

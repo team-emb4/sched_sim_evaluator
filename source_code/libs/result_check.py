@@ -60,111 +60,64 @@ def read_yaml_file(file_path):
 
 
 # ディレクトリ内のyamlファイル群から、スケジュール成功とスケジュール失敗の数をカウント
-def count_results(root_log_dir_path):
-    if not os.path.isabs(root_log_dir_path):
-        root_log_dir_path = os.path.abspath(root_log_dir_path)
+def count_results(root_result_dir_path):
+    if not os.path.isabs(root_result_dir_path):
+        root_result_dir_path = os.path.abspath(root_result_dir_path)
 
-    algo_dir = root_log_dir_path.split("/SchedResult")[0]
-    algo_name = os.path.basename(algo_dir)
-    algo_properties = get_algorithm_properties(algo_name)  # アルゴリズムのプロパティを取得
-    if algo_properties["preemptive"] == "true":
-        pre = os.path.basename(os.path.dirname(root_log_dir_path))
-        util.print_log("Target algorithm: " + algo_name + "-" + pre)
-    else:
-        util.print_log("Target algorithm: " + algo_name)
+    algo_dir_path = root_result_dir_path.split("/SchedResult")[0]
+    algo_name = os.path.basename(algo_dir_path)
+    algo_properties = get_algorithm_properties(algo_name)
+    preempt_type = os.path.basename(os.path.dirname(root_result_dir_path))
 
-    log_dir_count = len(os.listdir(root_log_dir_path))
-    max_utilization = [0] * log_dir_count
-    yaml_count = [0] * log_dir_count
-    schedulable_count = [0] * log_dir_count
-    unschedulable_count = [0] * log_dir_count
-    true_count = [0] * log_dir_count
-    false_count = [0] * log_dir_count
+    log_message = "Target algorithm: " + algo_name
+    if algo_properties.get("preemptive") == "true":
+        log_message += f" [{preempt_type}]"
+    util.print_log(log_message)
 
-    dir_list = os.listdir(root_log_dir_path)
-    dir_list.sort()
-    for i, log_dir in enumerate(dir_list):
-        util.print_log("Target directory: " + log_dir)
-        utilization = util.extract_utilization_from_config(log_dir)
-        if utilization is None:
-            continue
-        max_utilization[i] = utilization
+    result_dir_list = sorted(os.listdir(root_result_dir_path))
+    result_dir_count = len(result_dir_list)
+    result_stats = {
+        "max_utilization": [0] * result_dir_count,
+        "yaml_count": [0] * result_dir_count,
+        "true_count": [0] * result_dir_count,
+        "false_count": [0] * result_dir_count,
+        "accept": [0.0] * result_dir_count,
+    }
 
-        log_dir = os.path.join(root_log_dir_path, log_dir)
-        log_file_list = os.listdir(log_dir)
-        for j, file_name in enumerate(log_file_list):
-            util.progress_bar(j, len(log_file_list))
-            if file_name.endswith(".yaml"):
-                yaml_count[i] += 1
-                log_file_path = os.path.join(log_dir, file_name)
-                log_data = read_yaml_file(log_file_path)
+    for i, result_dir in enumerate(result_dir_list):
+        util.print_log("Target directory: " + result_dir)
 
-                if algo_properties["result"] == "schedulability":
-                    if isinstance(log_data["result"], SchedulableTag):
-                        schedulable_count[i] += 1
-                    elif isinstance(log_data["result"], UnschedulableTag):
-                        unschedulable_count[i] += 1
-                    else:
-                        print("Unknown Result")
+        result_stats["max_utilization"][i] = util.extract_utilization_from_name(result_dir)
 
-                else:  # resultがtrueまたはfalseで表される場合
-                    if log_data["result"]:
-                        true_count[i] += 1
-                    else:
-                        false_count[i] += 1
+        result_dir_path = os.path.join(root_result_dir_path, result_dir)
+        result_file_list = os.listdir(result_dir_path)
+        for j, result_file_name in enumerate(result_file_list):
+            util.progress_bar(j, len(result_file_list))
+            result_stats["yaml_count"][i] += 1
+            result = read_yaml_file(os.path.join(result_dir_path, result_file_name))["result"]
+            if isinstance(result, UnschedulableTag) or not result:
+                result_stats["false_count"][i] += 1
+            else:
+                result_stats["true_count"][i] += 1
 
         util.progress_bar(1, 1)
         print("")
 
-    print("==============Result==============")
-    accept = [0.0] * log_dir_count
-    for i, subdir in enumerate(dir_list):
-        print(f"Directory: {subdir}")
-        print(f"  Max utilization: {max_utilization[i]}")
-        print(f"  Number of .yaml files: {yaml_count[i]}")
-        if algo_properties["result"] == "schedulability":
-            print(f"  Number of schedulable: {schedulable_count[i]}")
-            print(f"  Number of schedulable: {unschedulable_count[i]}")
-            accept[i] = schedulable_count[i] / yaml_count[i]
-            print(f"  Acceptance of schedulable: {accept[i]}")
-        else:
-            print(f"  Number of true: {true_count[i]}")
-            print(f"  Number of false: {false_count[i]}")
-            accept[i] = true_count[i] / yaml_count[i]
-            print(f"  Acceptance of true: {accept[i]}")
-        print("")
+    for i in range(len(result_dir_list)):
+        result_stats["accept"][i] = result_stats["true_count"][i] / result_stats["yaml_count"][i]
 
-    print("Total:")
-    print(f"  Number of directories: {sum(yaml_count)}")
-    if algo_properties["result"] == "schedulability":
-        print(f"  Number of schedulable: {sum(schedulable_count)}")
-        print(f"  Number of unschedulable: {sum(unschedulable_count)}")
-        print(f"  Acceptance of schedulable: {sum(schedulable_count) / sum(yaml_count)}")
-    else:
-        print(f"  Number of true: {sum(true_count)}")
-        print(f"  Number of false: {sum(false_count)}")
-        print(f"  Acceptance of true: {sum(true_count) / sum(yaml_count):.3f}")
-    print("")
-    print("==================================")
-
-    core = os.path.basename(root_log_dir_path)
+    os.makedirs(f"{algo_dir_path}/OutputsResult", exist_ok=True)
     plt.figure()
-    # 縦軸: Acceptance of schedulable(true)
-    # 横軸: Max utilization
-    plt.plot(max_utilization, accept, marker="o", color="blue", linestyle="-")
+    plt.plot(result_stats["max_utilization"], result_stats["accept"],
+             marker="o", color="blue", linestyle="-")
     plt.xlabel("Max utilization")
-    if algo_properties["result"] == "schedulability":
-        plt.ylabel("Acceptance of schedulable")
-    else:
-        plt.ylabel("Acceptance of true")
-
-    os.makedirs(f"{algo_dir}/OutputsResult", exist_ok=True)
+    plt.ylabel("Acceptance of schedulable")
+    core_num = os.path.basename(root_result_dir_path)
     if algo_properties["preemptive"] == "true":
-        plt.savefig(
-            f"{algo_dir}/OutputsResult/plot_accept_{algo_name}_{pre}_{core}-cores.png"
-        )
+        file_name = f"{algo_dir_path}/OutputsResult/{algo_name}_{preempt_type}_{core_num}.png"
     else:
-        plt.savefig(f"{algo_dir}/OutputsResult/plot_accept_{algo_name}_{core}-cores.png")
+        file_name = f"{algo_dir_path}/OutputsResult/{algo_name}_{core_num}.png"
+    plt.savefig(file_name)
 
 
 if __name__ == "__main__":
