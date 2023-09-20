@@ -50,7 +50,7 @@ if __name__ == "__main__":
             full_command = command_create_dags.format(
                 config_path=config_path,
                 evaluator_path=evaluator_path,
-                utilization=util.extract_utilization_from_name(os.path.basename(config_path)/10),
+                utilization=(util.extract_utilization_from_name(os.path.basename(config_path))/10),
             )
             os.system(full_command)
     os.chdir(evaluator_path + "/source_code")
