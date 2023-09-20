@@ -2,6 +2,7 @@ import sys
 import os
 import yaml
 import matplotlib.pyplot as plt
+import csv
 
 from libs import util
 from libs.util import get_algorithm_properties
@@ -118,6 +119,15 @@ def count_results(root_result_dir_path):
     else:
         file_name = f"{algo_dir_path}/OutputsResult/{algo_name}_{core_num}.png"
     plt.savefig(file_name)
+
+    data = [["utilization", "accept"]]
+    for i in range(len(result_dir_list)):
+        data.append([result_stats["max_utilization"][i], result_stats["accept"][i]])
+
+    with open(f"{algo_dir_path}/OutputsResult/{algo_name}_{preempt_type}_{core_num}.csv",
+              "w", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(data)
 
 
 if __name__ == "__main__":
