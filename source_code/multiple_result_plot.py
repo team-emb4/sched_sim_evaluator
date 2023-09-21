@@ -21,6 +21,7 @@ if __name__ == "__main__":
 
     # CSVファイルを全て読み込む
     csv_files = glob.glob(f"{input_dir_path}/*.csv")
+    csv_files = sorted(csv_files)
 
     for csv_file in csv_files:
         # CSVデータの読み込み
@@ -28,11 +29,17 @@ if __name__ == "__main__":
         # 折れ線グラフをプロット
         plt.plot(df["utilization"], df["accept"], label=f"{os.path.basename(csv_file)}",
                  marker="o", linestyle="-")
+        # plt.plot(df["utilization"], df["speedup"], label=f"{os.path.basename(csv_file)}",
+        #          marker="o", linestyle="-")  # (評価1)
+        # plt.plot(df["sub_sequences"], df["speedup"], label=f"{os.path.basename(csv_file)}",
+        #          marker="o", linestyle="-")  # (評価2)
 
     # グラフの詳細設定
     plt.xlabel("Max utilization")
+    # plt.xlabel("Sub_sequences")  # (評価2)
     plt.ylabel("Acceptance of schedulable")
-    plt.legend()
+    # plt.ylabel("Speedup")  # (評価1, 評価2)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
     file_name = f"{input_dir_path}/{input_dir_path.split('/')[0]}_total.png"
-    plt.savefig(file_name)
+    plt.savefig(file_name, bbox_inches='tight')
