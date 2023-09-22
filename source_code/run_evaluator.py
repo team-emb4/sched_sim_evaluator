@@ -53,7 +53,9 @@ if __name__ == "__main__":
                 utilization=(util.extract_utilization_from_name(os.path.basename(config_path))/10),
             )
             os.system(full_command)
-    os.chdir(evaluator_path + "/source_code")
+
+    os.makedirs(f"{evaluator_path}/Outputs", exist_ok=True)
+    os.chdir(evaluator_path + "/Outputs")
 
     util.print_log("==============Prepare UsedDag==============")
     if os.path.exists(f"{algo_name}/UsedDag/"):
@@ -104,7 +106,7 @@ if __name__ == "__main__":
         root_input_tasks_dir=f"{algo_name}/UsedDag/",
         core_num=core_num,
     )
-    os.chdir(evaluator_path + "/source_code")
+    os.chdir(evaluator_path + "/Outputs")
 
     util.print_log("==============Result check==============")
     core_num = args["core_num"]

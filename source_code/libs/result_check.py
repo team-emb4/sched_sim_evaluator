@@ -83,6 +83,7 @@ def count_results(root_result_dir_path):
         "true_count": [0] * result_dir_count,
         "false_count": [0] * result_dir_count,
         "accept": [0.0] * result_dir_count,
+        "speedup": [0.0] * result_dir_count,  # 入力がDAGの時のみ有効
     }
 
     for i, result_dir in enumerate(result_dir_list):
@@ -92,6 +93,8 @@ def count_results(root_result_dir_path):
 
         result_dir_path = os.path.join(root_result_dir_path, result_dir)
         result_file_list = os.listdir(result_dir_path)
+        Input_type = algo_properties.get("input")
+
         for j, result_file_name in enumerate(result_file_list):
             util.progress_bar(j, len(result_file_list))
             result_stats["yaml_count"][i] += 1
@@ -101,11 +104,20 @@ def count_results(root_result_dir_path):
             else:
                 result_stats["true_count"][i] += 1
 
+            if Input_type == "DAG":
+                volume = (read_yaml_file(os.path.join(result_dir_path, result_file_name))
+                          ["dag_info"]["volume"])
+                length = (read_yaml_file(os.path.join(result_dir_path, result_file_name))
+                          ["schedule_length"])
+                result_stats["speedup"][i] += volume / length
         util.progress_bar(1, 1)
         print("")
 
     for i in range(len(result_dir_list)):
         result_stats["accept"][i] = result_stats["true_count"][i] / result_stats["yaml_count"][i]
+        if Input_type == "DAG":
+            result_stats["speedup"][i] = (
+                round(result_stats["speedup"][i] / result_stats["yaml_count"][i], 3))
 
     os.makedirs(f"{algo_dir_path}/OutputsResult", exist_ok=True)
     plt.figure()
@@ -113,21 +125,36 @@ def count_results(root_result_dir_path):
              marker="o", color="blue", linestyle="-")
     plt.xlabel("Max utilization")
     plt.ylabel("Acceptance of schedulable")
+
     core_num = os.path.basename(root_result_dir_path)
     if algo_properties["preemptive"] == "true":
-        file_name = f"{algo_dir_path}/OutputsResult/{algo_name}_{preempt_type}_{core_num}.png"
+        os.makedirs(f"{algo_dir_path}/OutputsResult/{preempt_type}", exist_ok=True)
+        file_name = (f"{algo_dir_path}/OutputsResult/{preempt_type}/"
+                     f"{algo_name}_{preempt_type}_{core_num}.png")
     else:
         file_name = f"{algo_dir_path}/OutputsResult/{algo_name}_{core_num}.png"
     plt.savefig(file_name)
 
-    data = [["utilization", "accept"]]
-    for i in range(len(result_dir_list)):
-        data.append([result_stats["max_utilization"][i], result_stats["accept"][i]])
+    data = [["utilization", "accept", "speedup"]]
 
-    with open(f"{algo_dir_path}/OutputsResult/{algo_name}_{preempt_type}_{core_num}.csv",
-              "w", newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(data)
+    for i in range(len(result_dir_list)):
+        data.append([
+            str(result_stats["max_utilization"][i]),
+            str(result_stats["accept"][i]),
+            str(result_stats["speedup"][i])
+        ])
+
+    if algo_properties.get("preemptive") == "true":
+        with open(f"{algo_dir_path}/OutputsResult/{preempt_type}/"
+                  f"{algo_name}_{preempt_type}_{core_num}.csv",
+                  "w", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(data)
+    else:
+        with open(f"{algo_dir_path}/OutputsResult/{algo_name}_{core_num}.csv",
+                  "w", newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(data)
 
 
 if __name__ == "__main__":
