@@ -31,14 +31,11 @@ if __name__ == "__main__":
                  marker="o", linestyle="-")
         # plt.plot(df["utilization"], df["speedup"], label=f"{os.path.basename(csv_file)}",
         #          marker="o", linestyle="-")  # (評価1)
-        # plt.plot(df["sub_sequences"], df["speedup"], label=f"{os.path.basename(csv_file)}",
-        #          marker="o", linestyle="-")  # (評価2)
 
     # グラフの詳細設定
     plt.xlabel("Max utilization")
-    # plt.xlabel("Sub_sequences")  # (評価2)
     plt.ylabel("Acceptance of schedulable")
-    # plt.ylabel("Speedup")  # (評価1, 評価2)
+    # plt.ylabel("Speedup")  # (評価1)
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
     file_name = f"{input_dir_path}/{input_dir_path.split('/')[0]}_total.png"
